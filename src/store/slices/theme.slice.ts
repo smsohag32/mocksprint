@@ -17,6 +17,9 @@ const initialState: ThemeState = {
   mode: getInitialTheme(),
 };
 
+/**
+ * Slice for global theme management (light/dark mode).
+ */
 const themeSlice = createSlice({
   name: 'theme',
   initialState,
@@ -24,7 +27,9 @@ const themeSlice = createSlice({
     toggleTheme: (state) => {
       state.mode = state.mode === 'light' ? 'dark' : 'light';
       localStorage.setItem('theme', state.mode);
-      document.documentElement.classList.toggle('dark', state.mode === 'dark');
+      if (typeof document !== 'undefined') {
+        document.documentElement.classList.toggle('dark', state.mode === 'dark');
+      }
     },
   },
 });
