@@ -5,8 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Code2, Trophy, History, Target, ArrowRight } from 'lucide-react';
 import { useAppSelector } from '@/store/hooks';
-import { useGetHistoryQuery, useGetSubmissionsQuery } from '@/services/api/interviewApi';
-import { useGetLeaderboardQuery } from '@/services/api/leaderboardApi';
+import { useGetHistoryQuery, useGetSubmissionsQuery } from "@/api/endpoints/interview.api";
+import { useGetLeaderboardQuery } from "@/api/endpoints/leaderboard.api";
 import { Link } from 'react-router-dom';
 
 export default function DashboardPage() {

@@ -5,7 +5,7 @@ import { baseApi } from '@/api/base.api';
  */
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getMe: builder.query<any, void>({
+    getProfile: builder.query<any, void>({
       query: () => '/auth/me',
       providesTags: ['Profile'],
     }),
@@ -29,12 +29,20 @@ export const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['User'],
     }),
+    deleteUser: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/admin/users/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['User'],
+    }),
   }),
 });
 
 export const {
-  useGetMeQuery,
+  useGetProfileQuery,
   useUpdateProfileMutation,
   useGetAllUsersQuery,
   useUpdateUserRoleMutation,
+  useDeleteUserMutation,
 } = userApi;

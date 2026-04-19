@@ -13,12 +13,13 @@ import { Plus, Trash2, Pencil } from 'lucide-react';
 import {
   useGetQuestionsQuery,
   useCreateQuestionMutation,
+  useUpdateQuestionMutation,
   useDeleteQuestionMutation,
-} from '@/services/api/questionApi';
+} from "@/api/endpoints/question.api";
 import { toast } from 'sonner';
 
 export default function ManageQuestionsPage() {
-  const { data: questions, isLoading } = useGetQuestionsQuery({});
+  const { data: questions, isLoading } = useGetQuestionsQuery();
   const [createQuestion, { isLoading: creating }] = useCreateQuestionMutation();
   const [deleteQuestion] = useDeleteQuestionMutation();
   const [open, setOpen] = useState(false);

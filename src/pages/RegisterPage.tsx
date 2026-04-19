@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Code2 } from 'lucide-react';
-import { useRegisterMutation } from '@/services/api/authApi';
+import { useRegisterMutation } from '@/api/endpoints/auth.api';
 import { toast } from 'sonner';
 
 export default function RegisterPage() {

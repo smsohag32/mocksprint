@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search } from 'lucide-react';
-import { useGetQuestionsQuery } from '@/services/api/questionApi';
+import { useGetQuestionsQuery } from "@/api/endpoints/question.api";
 import { Link } from 'react-router-dom';
 
 const categories = ['all', 'frontend', 'backend', 'dsa', 'system_design'] as const;

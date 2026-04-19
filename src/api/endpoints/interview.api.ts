@@ -9,6 +9,14 @@ export const interviewApi = baseApi.injectEndpoints({
       query: () => '/interviews',
       providesTags: ['Interview'],
     }),
+    getHistory: builder.query<any[], void>({
+      query: () => '/interviews',
+      providesTags: ['Interview'],
+    }),
+    getSubmissions: builder.query<any[], void>({
+      query: () => '/interviews',
+      providesTags: ['Interview'],
+    }),
     getInterviewById: builder.query<any, string>({
       query: (id) => `/interviews/${id}`,
       providesTags: (_, __, id) => [{ type: 'Interview', id }],
@@ -41,6 +49,8 @@ export const interviewApi = baseApi.injectEndpoints({
 
 export const {
   useGetInterviewsQuery,
+  useGetHistoryQuery,
+  useGetSubmissionsQuery,
   useGetInterviewByIdQuery,
   useStartInterviewMutation,
   useSubmitInterviewMutation,

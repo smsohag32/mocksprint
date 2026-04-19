@@ -5,8 +5,14 @@ import { baseApi } from '@/api/base.api';
  */
 export const questionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getQuestions: builder.query<any[], void>({
-      query: () => '/questions',
+    getQuestions: builder.query<any[], { category?: string; difficulty?: string } | void>({
+      query: (filters) => {
+        const params = new URLSearchParams();
+        if (filters && filters.category) params.append('category', filters.category);
+        if (filters && filters.difficulty) params.append('difficulty', filters.difficulty);
+        const queryString = params.toString();
+        return queryString ? `/questions?${queryString}` : '/questions';
+      },
       providesTags: ['Question'],
     }),
     getQuestionById: builder.query<any, string>({

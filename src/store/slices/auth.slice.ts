@@ -9,6 +9,7 @@ const getPersistedUser = cookieValue ? JSON.parse(cookieValue) : null;
 const initialState: any = {
    token: getPersistedToken,
    user: getPersistedUser,
+   isAuthenticated: !!getPersistedToken,
    isLoading: false,
    error: null,
 };
@@ -46,6 +47,7 @@ const authSlice = createSlice({
       logoutUser: (state) => {
          state.token = null;
          state.user = null;
+         state.isAuthenticated = false;
          deleteCookie("access_token");
          deleteCookie("refresh_token");
          deleteCookie("user_info");
@@ -60,6 +62,7 @@ const authSlice = createSlice({
          const { user, token } = action.payload;
          state.user = user;
          state.token = token;
+         state.isAuthenticated = !!token || !!user;
          if (token) setCookie("access_token", token);
          if (user) setCookie("user_info", JSON.stringify(user));
       },
@@ -68,6 +71,7 @@ const authSlice = createSlice({
       },
       updateToken: (state, action) => {
          state.token = action.payload;
+         state.isAuthenticated = !!action.payload;
          setCookie("access_token", action.payload);
       }
    },
@@ -84,6 +88,7 @@ const authSlice = createSlice({
             
             state.token = token;
             state.user = restUserInfo;
+            state.isAuthenticated = !!token;
 
             if (token) setCookie("access_token", token);
             if (refresh_token) setCookie("refresh_token", refresh_token);
