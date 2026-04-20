@@ -7,8 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useGetProfileQuery, useUpdateProfileMutation } from '@/services/api/userApi';
-import { useGetSubmissionsQuery } from '@/services/api/interviewApi';
+import { useGetProfileQuery, useUpdateProfileMutation } from "@/api/endpoints/user.api";
+import { useGetSubmissionsQuery } from "@/api/endpoints/interview.api";
 import { useAppSelector } from '@/store/hooks';
 import { toast } from 'sonner';
 

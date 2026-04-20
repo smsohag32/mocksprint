@@ -2,7 +2,7 @@ import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useGetHistoryQuery } from '@/services/api/interviewApi';
+import { useGetHistoryQuery } from "@/api/endpoints/interview.api";
 
 export default function HistoryPage() {
   const { data: history, isLoading } = useGetHistoryQuery();

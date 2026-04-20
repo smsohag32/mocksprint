@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Trash2 } from 'lucide-react';
-import { useGetAllUsersQuery, useDeleteUserMutation } from '@/services/api/userApi';
+import { useGetAllUsersQuery, useDeleteUserMutation } from "@/api/endpoints/user.api";
 import { toast } from 'sonner';
 
 export default function ManageUsersPage() {
