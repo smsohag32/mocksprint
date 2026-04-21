@@ -23,14 +23,15 @@ interface RegisterFormValues {
    name: string;
    email: string;
    password: string;
+   passwordConfirmation: string;
 }
 
 /* ─── brand highlights ───────────────────────────────── */
 const highlights = [
-   { icon: Code2,  text: "Monaco-powered code editor"  },
-   { icon: Timer,  text: "Real-time timed interviews"   },
-   { icon: Trophy, text: "Global leaderboard ranking"   },
-   { icon: Zap,    text: "Pressure-mode simulation"     },
+   { icon: Code2, text: "Monaco-powered code editor" },
+   { icon: Timer, text: "Real-time timed interviews" },
+   { icon: Trophy, text: "Global leaderboard ranking" },
+   { icon: Zap, text: "Pressure-mode simulation" },
 ];
 
 /* ═══════════════════════════════════════════════════════
@@ -38,22 +39,29 @@ const highlights = [
 ════════════════════════════════════════════════════════ */
 export default function RegisterPage() {
    const [showPassword, setShowPassword] = useState(false);
+   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
    const [register_api, { isLoading }] = useRegisterMutation();
    const navigate = useNavigate();
 
    const {
       register,
       handleSubmit,
+      watch,
       formState: { errors },
    } = useForm<RegisterFormValues>({ mode: "onTouched" });
 
+   const password = watch("password");
+
    const onSubmit = async (data: RegisterFormValues) => {
       try {
-         await register_api(data).unwrap();
+         const { name, email, password } = data;
+         await register_api({ name, email, password }).unwrap();
          toast.success("Account created! Check your email to confirm. 🎉");
          navigate("/login");
       } catch (err: any) {
-         toast.error(err?.data?.message || err?.message || "Registration failed. Please try again.");
+         toast.error(
+            err?.data?.message || err?.message || "Registration failed. Please try again.",
+         );
       }
    };
 
@@ -138,7 +146,7 @@ export default function RegisterPage() {
                   {[
                      { value: "10K+", label: "Users" },
                      { value: "500+", label: "Questions" },
-                     { value: "98%",  label: "Success" },
+                     { value: "98%", label: "Success" },
                   ].map(({ value, label }) => (
                      <div
                         key={label}
@@ -183,7 +191,10 @@ export default function RegisterPage() {
                {/* Mobile logo */}
                <div className="mb-8 flex items-center gap-2 lg:hidden">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500">
-                     <Code2 className="h-5 w-5 text-white" strokeWidth={2.5} />
+                     <Code2
+                        className="h-5 w-5 text-white"
+                        strokeWidth={2.5}
+                     />
                   </div>
                   <span className="text-xl font-bold">MockSprint</span>
                </div>
@@ -203,14 +214,14 @@ export default function RegisterPage() {
                   onSubmit={handleSubmit(onSubmit)}
                   className="space-y-4"
                   noValidate>
-
                   {/* Full Name */}
                   <div className="space-y-1.5">
                      <div
                         className={`flex items-center rounded-lg border bg-background transition-all duration-200
-                        ${errors.name
-                           ? "border-red-400 ring-2 ring-red-400/20"
-                           : "border-border hover:border-blue-400/60 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/25"
+                        ${
+                           errors.name
+                              ? "border-red-400 ring-2 ring-red-400/20"
+                              : "border-border hover:border-blue-400/60 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/25"
                         }`}>
                         <span className="flex h-full items-center pl-3.5 pr-2.5">
                            <User
@@ -225,7 +236,7 @@ export default function RegisterPage() {
                            id="name"
                            type="text"
                            autoComplete="name"
-                           placeholder="John Doe"
+                           placeholder="Sohag"
                            className="flex-1 bg-transparent py-2.5 pl-3 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none"
                            {...register("name", {
                               required: "Full name is required",
@@ -247,9 +258,10 @@ export default function RegisterPage() {
                   <div className="space-y-1.5">
                      <div
                         className={`flex items-center rounded-lg border bg-background transition-all duration-200
-                        ${errors.email
-                           ? "border-red-400 ring-2 ring-red-400/20"
-                           : "border-border hover:border-blue-400/60 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/25"
+                        ${
+                           errors.email
+                              ? "border-red-400 ring-2 ring-red-400/20"
+                              : "border-border hover:border-blue-400/60 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/25"
                         }`}>
                         <span className="flex h-full items-center pl-3.5 pr-2.5">
                            <Mail
@@ -286,9 +298,10 @@ export default function RegisterPage() {
                   <div className="space-y-1.5">
                      <div
                         className={`flex items-center rounded-lg border bg-background transition-all duration-200
-                        ${errors.password
-                           ? "border-red-400 ring-2 ring-red-400/20"
-                           : "border-border hover:border-blue-400/60 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/25"
+                        ${
+                           errors.password
+                              ? "border-red-400 ring-2 ring-red-400/20"
+                              : "border-border hover:border-blue-400/60 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/25"
                         }`}>
                         <span className="flex h-full items-center pl-3.5 pr-2.5">
                            <Lock
@@ -303,7 +316,7 @@ export default function RegisterPage() {
                            id="password"
                            type={showPassword ? "text" : "password"}
                            autoComplete="new-password"
-                           placeholder="Min. 6 characters"
+                           placeholder="Create password"
                            className="flex-1 bg-transparent py-2.5 pl-3 pr-3 text-sm text-foreground placeholder:text-muted-foreground outline-none"
                            {...register("password", {
                               required: "Password is required",
@@ -324,6 +337,53 @@ export default function RegisterPage() {
                      {errors.password && (
                         <p className="flex items-center gap-1 text-xs text-red-500 mt-1">
                            {errors.password.message}
+                        </p>
+                     )}
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="space-y-1.5">
+                     <div
+                        className={`flex items-center rounded-lg border bg-background transition-all duration-200
+                        ${
+                           errors.passwordConfirmation
+                              ? "border-red-400 ring-2 ring-red-400/20"
+                              : "border-border hover:border-blue-400/60 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/25"
+                        }`}>
+                        <span className="flex h-full items-center pl-3.5 pr-2.5">
+                           <Lock
+                              size={16}
+                              className={`shrink-0 transition-colors ${
+                                 errors.passwordConfirmation
+                                    ? "text-red-400"
+                                    : "text-muted-foreground"
+                              }`}
+                           />
+                        </span>
+                        <div className="h-5 w-px bg-border" />
+                        <input
+                           id="passwordConfirmation"
+                           type={showConfirmPassword ? "text" : "password"}
+                           autoComplete="new-password"
+                           placeholder="Confirm password"
+                           className="flex-1 bg-transparent py-2.5 pl-3 pr-3 text-sm text-foreground placeholder:text-muted-foreground outline-none"
+                           {...register("passwordConfirmation", {
+                              required: "Please confirm your password",
+                              validate: (value) =>
+                                 value === password || "The passwords do not match",
+                           })}
+                        />
+                        <button
+                           type="button"
+                           onClick={() => setShowConfirmPassword((v) => !v)}
+                           className="mr-3 text-muted-foreground hover:text-foreground transition-colors"
+                           aria-label={showConfirmPassword ? "Hide password" : "Show password"}>
+                           {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                     </div>
+                     {errors.passwordConfirmation && (
+                        <p className="flex items-center gap-1 text-xs text-red-500 mt-1">
+                           {errors.passwordConfirmation.message}
                         </p>
                      )}
                   </div>
