@@ -29,6 +29,7 @@ const lazyWithRetry = (componentImport: () => Promise<any>) =>
    });
 
 import LandingPage from "@/pages/LandingPage";
+import PublicLayout from "@/layouts/PublicLayout";
 
 // Lazy loaded pages
 const LoginPage = lazyWithRetry(() => import("@/pages/LoginPage"));
@@ -56,8 +57,13 @@ export const router = createBrowserRouter([
       errorElement: <ErrorPage />,
       children: [
          {
-            index: true,
-            element: <LandingPage />,
+            element: <PublicLayout />,
+            children: [
+               {
+                  index: true,
+                  element: <LandingPage />,
+               },
+            ],
          },
          {
             path: "login",
