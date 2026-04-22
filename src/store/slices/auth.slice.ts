@@ -95,6 +95,12 @@ const authSlice = createSlice({
       setLoading: (state, action) => {
          state.isLoading = action.payload;
       },
+      /** Update specific user fields (e.g., after profile update) */
+      updateUser: (state, action) => {
+         const updatedUser = { ...state.user, ...action.payload };
+         state.user = updatedUser;
+         setCookie("user_info", JSON.stringify(updatedUser));
+      },
    },
    extraReducers: (builder) => {
       /* ── Login ── */
@@ -155,7 +161,7 @@ const authSlice = createSlice({
    },
 });
 
-export const { logoutUser, updateToken, setCredentials, setLoading } =
+export const { logoutUser, updateToken, setCredentials, setLoading, updateUser } =
    authSlice.actions;
 
 export default authSlice.reducer;

@@ -52,7 +52,7 @@ const accountItems = [{ title: "Profile", url: "/profile", icon: User }];
 
 const adminItems = [
    { title: "Admin Dashboard", url: "/admin", icon: BarChart3 },
-   { title: "Manage Users", url: "/admin/users", icon: Users, badge: "12" },
+   { title: "Manage Users", url: "/admin/users", icon: Users },
    { title: "Manage Questions", url: "/admin/questions", icon: FileQuestion },
    { title: "Manage Interviews", url: "/admin/interviews", icon: Shield },
 ];

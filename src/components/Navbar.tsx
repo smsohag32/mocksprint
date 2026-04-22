@@ -1,6 +1,6 @@
 import { Moon, Sun, Bell, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
    DropdownMenu,
    DropdownMenuContent,
@@ -8,14 +8,15 @@ import {
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/hooks/useTheme";
-import { useAppSelector } from "@/store/hooks";
 import { useLogoutMutation } from "@/api/endpoints/auth.api";
 import { useNavigate } from "react-router-dom";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useAuth } from "@/hooks/auth/useAuth";
+import { getImageUrl } from "@/lib/image-utils";
 
 export function Navbar() {
    const { mode, toggle } = useTheme();
-   const user = useAppSelector((state) => state.auth.user);
+   const { user } = useAuth();
    const [logoutFn] = useLogoutMutation();
    const navigate = useNavigate();
 
@@ -49,6 +50,11 @@ export function Navbar() {
                   variant="ghost"
                   className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
+                     <AvatarImage
+                        src={getImageUrl(user?.profile_image)}
+                        alt={user?.name}
+                        className="object-cover"
+                     />
                      <AvatarFallback className="gradient-primary text-primary-foreground text-xs">
                         {user?.name?.charAt(0)?.toUpperCase() || "U"}
                      </AvatarFallback>

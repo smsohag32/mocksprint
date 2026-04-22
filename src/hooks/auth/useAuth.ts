@@ -5,7 +5,6 @@ import {
    loginUser,
    logoutUser,
    refreshToken,
-   updateUserSignatureUrl,
 } from "@/store/slices/auth.slice";
 import { RootState } from "@/store";
 
@@ -34,10 +33,6 @@ export const useAuth = () => {
       return dispatch(refreshToken()).unwrap();
    };
 
-   const updateSignature = (signatureUrl: string) => {
-      dispatch(updateUserSignatureUrl(signatureUrl));
-   };
-
    return {
       user,
       token,
@@ -47,6 +42,5 @@ export const useAuth = () => {
       login,
       logout,
       refresh,
-      updateSignature,
    };
 };

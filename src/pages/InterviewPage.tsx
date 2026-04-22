@@ -227,6 +227,10 @@ export default function InterviewPage() {
                      options={{
                         minimap: { enabled: false },
                         fontSize: 14,
+
+
+                        
+
                         lineNumbers: "on",
                         scrollBeyondLastLine: false,
                         automaticLayout: true,

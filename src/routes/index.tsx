@@ -46,6 +46,7 @@ const AdminDashboardPage = lazyWithRetry(() => import("@/pages/admin/AdminDashbo
 const ManageUsersPage = lazyWithRetry(() => import("@/pages/admin/ManageUsersPage"));
 const ManageQuestionsPage = lazyWithRetry(() => import("@/pages/admin/ManageQuestionsPage"));
 const ManageInterviewsPage = lazyWithRetry(() => import("@/pages/admin/ManageInterviewsPage"));
+const UserDetailsPage = lazyWithRetry(() => import("@/pages/admin/UserDetailsPage"));
 const NotFound = lazyWithRetry(() => import("@/pages/NotFound"));
 
 /**
@@ -123,11 +124,24 @@ export const router = createBrowserRouter([
                      },
                      {
                         path: "users",
-                        element: (
-                           <ProtectedRoute requireAdmin>
-                              <ManageUsersPage />
-                           </ProtectedRoute>
-                        ),
+                        children: [
+                           {
+                              index: true,
+                              element: (
+                                 <ProtectedRoute requireAdmin>
+                                    <ManageUsersPage />
+                                 </ProtectedRoute>
+                              ),
+                           },
+                           {
+                              path: ":id",
+                              element: (
+                                 <ProtectedRoute requireAdmin>
+                                    <UserDetailsPage />
+                                 </ProtectedRoute>
+                              ),
+                           },
+                        ],
                      },
                      {
                         path: "questions",
