@@ -65,6 +65,10 @@ export default function LoginPage() {
       }
    };
 
+   const onInvalid = () => {
+      toast.warning("Please check your login credentials. 🧐");
+   };
+
    return (
       <div className="flex min-h-screen">
          {/* ══════════ LEFT — Brand Panel ══════════ */}
@@ -211,7 +215,7 @@ export default function LoginPage() {
 
                {/* Form */}
                <form
-                  onSubmit={handleSubmit(onSubmit)}
+                  onSubmit={handleSubmit(onSubmit, onInvalid)}
                   className="space-y-5"
                   noValidate>
                   {/* Email */}

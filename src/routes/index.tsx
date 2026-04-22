@@ -28,8 +28,9 @@ const lazyWithRetry = (componentImport: () => Promise<any>) =>
       }
    });
 
-import LandingPage from "@/pages/LandingPage";
+import { DashboardLayout } from "@/layouts/DashboardLayout";
 import PublicLayout from "@/layouts/PublicLayout";
+import LandingPage from "@/pages/LandingPage";
 
 // Lazy loaded pages
 const LoginPage = lazyWithRetry(() => import("@/pages/LoginPage"));
@@ -79,87 +80,72 @@ export const router = createBrowserRouter([
             element: <VerifyEmailPage />,
          },
          {
-            path: "dashboard",
             element: (
                <ProtectedRoute>
-                  <DashboardPage />
+                  <DashboardLayout />
                </ProtectedRoute>
             ),
-         },
-         {
-            path: "interview",
-            element: (
-               <ProtectedRoute>
-                  <InterviewPage />
-               </ProtectedRoute>
-            ),
-         },
-         {
-            path: "questions",
-            element: (
-               <ProtectedRoute>
-                  <QuestionsPage />
-               </ProtectedRoute>
-            ),
-         },
-         {
-            path: "leaderboard",
-            element: (
-               <ProtectedRoute>
-                  <LeaderboardPage />
-               </ProtectedRoute>
-            ),
-         },
-         {
-            path: "history",
-            element: (
-               <ProtectedRoute>
-                  <HistoryPage />
-               </ProtectedRoute>
-            ),
-         },
-         {
-            path: "profile",
-            element: (
-               <ProtectedRoute>
-                  <ProfilePage />
-               </ProtectedRoute>
-            ),
-         },
-         {
-            path: "admin",
             children: [
                {
-                  index: true,
-                  element: (
-                     <ProtectedRoute requireAdmin>
-                        <AdminDashboardPage />
-                     </ProtectedRoute>
-                  ),
+                  path: "dashboard",
+                  element: <DashboardPage />,
                },
                {
-                  path: "users",
-                  element: (
-                     <ProtectedRoute requireAdmin>
-                        <ManageUsersPage />
-                     </ProtectedRoute>
-                  ),
+                  path: "interview",
+                  element: <InterviewPage />,
                },
                {
                   path: "questions",
-                  element: (
-                     <ProtectedRoute requireAdmin>
-                        <ManageQuestionsPage />
-                     </ProtectedRoute>
-                  ),
+                  element: <QuestionsPage />,
                },
                {
-                  path: "interviews",
-                  element: (
-                     <ProtectedRoute requireAdmin>
-                        <ManageInterviewsPage />
-                     </ProtectedRoute>
-                  ),
+                  path: "leaderboard",
+                  element: <LeaderboardPage />,
+               },
+               {
+                  path: "history",
+                  element: <HistoryPage />,
+               },
+               {
+                  path: "profile",
+                  element: <ProfilePage />,
+               },
+               {
+                  path: "admin",
+                  children: [
+                     {
+                        index: true,
+                        element: (
+                           <ProtectedRoute requireAdmin>
+                              <AdminDashboardPage />
+                           </ProtectedRoute>
+                        ),
+                     },
+                     {
+                        path: "users",
+                        element: (
+                           <ProtectedRoute requireAdmin>
+                              <ManageUsersPage />
+                           </ProtectedRoute>
+                        ),
+                     },
+                     {
+                        path: "questions",
+                        element: (
+                           <ProtectedRoute requireAdmin>
+                              <ManageQuestionsPage />
+                           </ProtectedRoute>
+                        ),
+                     },
+                     {
+                        path: "interviews",
+                        element: (
+                           <ProtectedRoute requireAdmin>
+                              <ManageInterviewsPage />
+                           </ProtectedRoute>
+                        ),
+                     },
+                  ],
                },
             ],
          },

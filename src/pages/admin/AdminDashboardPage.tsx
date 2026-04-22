@@ -28,25 +28,23 @@ export default function AdminDashboardPage() {
    ];
 
    return (
-      <DashboardLayout>
-         <div className="space-y-6 animate-fade-in">
-            <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-               {stats.map((s) => (
-                  <Card
-                     key={s.label}
-                     className="border-border/50">
-                     <CardContent className="flex items-center gap-4 p-6">
-                        <s.icon className={`h-8 w-8 ${s.color}`} />
-                        <div>
-                           <p className="text-sm text-muted-foreground">{s.label}</p>
-                           <p className="text-2xl font-bold">{s.value}</p>
-                        </div>
-                     </CardContent>
-                  </Card>
-               ))}
-            </div>
+      <div className="space-y-6 animate-fade-in">
+         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {stats.map((s) => (
+               <Card
+                  key={s.label}
+                  className="border-border/50">
+                  <CardContent className="flex items-center gap-4 p-6">
+                     <s.icon className={`h-8 w-8 ${s.color}`} />
+                     <div>
+                        <p className="text-sm text-muted-foreground">{s.label}</p>
+                        <p className="text-2xl font-bold">{s.value}</p>
+                     </div>
+                  </CardContent>
+               </Card>
+            ))}
          </div>
-      </DashboardLayout>
+      </div>
    );
 }
