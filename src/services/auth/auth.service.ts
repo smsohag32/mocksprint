@@ -1,40 +1,50 @@
-const API_BASE_URL = import.meta.env.VITE_BASE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_BASE_API_URL || "http://localhost:5000/api/v1";
 
 /**
- * Service for manual authentication API calls.
- * Used primarily by Redux thunks and the re-authentication middleware.
+ * Manual fetch helpers used by Redux thunks and the re-auth middleware.
+ * These bypass RTK Query intentionally (token refresh must not go through the interceptor).
  */
 
-export const loginApi = async (credentials: any) => {
-   const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-         'Content-Type': 'application/json',
-      },
+export const loginApi = async (credentials: {
+   email: string;
+   password: string;
+}) => {
+   const response = await fetch(`${API_BASE_URL}/auth/sign-in`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include", // send/receive httpOnly cookies
       body: JSON.stringify(credentials),
    });
 
+   const data = await response.json();
    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Login failed');
+      throw new Error(data.message || "Login failed.");
    }
-
-   return response.json();
+   return data;
 };
 
 export const refreshTokenApi = async (refreshToken: string) => {
    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
-      method: 'POST',
-      headers: {
-         'Content-Type': 'application/json',
-      },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ refresh_token: refreshToken }),
    });
 
+   const data = await response.json();
    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Refresh token failed');
+      throw new Error(data.message || "Token refresh failed.");
    }
+   return data;
+};
 
-   return response.json();
+export const logoutApi = async (accessToken: string) => {
+   await fetch(`${API_BASE_URL}/auth/logout`, {
+      method: "POST",
+      headers: {
+         "Content-Type": "application/json",
+         Authorization: `Bearer ${accessToken}`,
+      },
+      credentials: "include",
+   });
 };

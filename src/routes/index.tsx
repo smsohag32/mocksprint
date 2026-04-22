@@ -34,6 +34,7 @@ import PublicLayout from "@/layouts/PublicLayout";
 // Lazy loaded pages
 const LoginPage = lazyWithRetry(() => import("@/pages/LoginPage"));
 const RegisterPage = lazyWithRetry(() => import("@/pages/RegisterPage"));
+const VerifyEmailPage = lazyWithRetry(() => import("@/pages/VerifyEmailPage"));
 const DashboardPage = lazyWithRetry(() => import("@/pages/DashboardPage"));
 const InterviewPage = lazyWithRetry(() => import("@/pages/InterviewPage"));
 const QuestionsPage = lazyWithRetry(() => import("@/pages/QuestionsPage"));
@@ -72,6 +73,10 @@ export const router = createBrowserRouter([
          {
             path: "register",
             element: <RegisterPage />,
+         },
+         {
+            path: "verify-email",
+            element: <VerifyEmailPage />,
          },
          {
             path: "dashboard",
