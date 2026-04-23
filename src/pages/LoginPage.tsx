@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLoginMutation } from "@/api/endpoints/auth.api";
+import { useAppDispatch } from "@/store/hooks";
+import { setCredentials } from "@/store/slices/auth.slice";
 import Logo from "@/assets/logo/Logo";
 
 /* ─── types ─────────────────────────────────────────── */
@@ -38,6 +40,7 @@ export default function LoginPage() {
    const [showPassword, setShowPassword] = useState(false);
    const [login, { isLoading }] = useLoginMutation();
    const navigate = useNavigate();
+   const dispatch = useAppDispatch();
 
    const {
       register,
@@ -47,12 +50,23 @@ export default function LoginPage() {
 
    const onSubmit = async (data: LoginFormValues) => {
       try {
-         await login(data).unwrap();
+         const result = await login(data).unwrap();
+         
+         dispatch(setCredentials({
+            user: result.user,
+            token: result.token,
+            refresh_token: result.refresh_token
+         }));
+
          toast.success("Welcome back! 🚀");
          navigate("/dashboard");
       } catch (err: any) {
          toast.error(err?.data?.message || err?.message || "Login failed. Please try again.");
       }
+   };
+
+   const onInvalid = () => {
+      toast.warning("Please check your login credentials. 🧐");
    };
 
    return (
@@ -201,7 +215,7 @@ export default function LoginPage() {
 
                {/* Form */}
                <form
-                  onSubmit={handleSubmit(onSubmit)}
+                  onSubmit={handleSubmit(onSubmit, onInvalid)}
                   className="space-y-5"
                   noValidate>
                   {/* Email */}

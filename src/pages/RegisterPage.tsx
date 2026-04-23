@@ -65,6 +65,10 @@ export default function RegisterPage() {
       }
    };
 
+   const onInvalid = () => {
+      toast.warning("Please correct the errors in the form. 🧐");
+   };
+
    return (
       <div className="flex min-h-screen">
          {/* ══════════ LEFT — Brand Panel ══════════ */}
@@ -211,7 +215,7 @@ export default function RegisterPage() {
 
                {/* Form */}
                <form
-                  onSubmit={handleSubmit(onSubmit)}
+                  onSubmit={handleSubmit(onSubmit, onInvalid)}
                   className="space-y-4"
                   noValidate>
                   {/* Full Name */}

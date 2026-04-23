@@ -61,9 +61,6 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
          }
       } else {
          api.dispatch(logoutUser());
-         if (typeof window !== "undefined") {
-            window.location.href = "/login";
-         }
       }
    }
 
@@ -77,6 +74,6 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const baseApi = createApi({
    reducerPath: "api",
    baseQuery: baseQueryWithReauth,
-   tagTypes: ["User", "Question", "Interview", "Submission", "Leaderboard", "Profile"],
+   tagTypes: ["User", "Question", "Interview", "Submission", "Leaderboard", "Profile", "Categories"],
    endpoints: () => ({}),
 });

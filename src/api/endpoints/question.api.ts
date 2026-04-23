@@ -5,18 +5,21 @@ import { baseApi } from '@/api/base.api';
  */
 export const questionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getQuestions: builder.query<any[], { category?: string; difficulty?: string } | void>({
+    getQuestions: builder.query<any[], { category?: string; difficulty?: string; search?: string } | void>({
       query: (filters) => {
         const params = new URLSearchParams();
         if (filters && filters.category) params.append('category', filters.category);
         if (filters && filters.difficulty) params.append('difficulty', filters.difficulty);
+        if (filters && filters.search) params.append('search', filters.search);
         const queryString = params.toString();
         return queryString ? `/questions?${queryString}` : '/questions';
       },
+      transformResponse: (response: { questions: any[] }) => response.questions,
       providesTags: ['Question'],
     }),
     getQuestionById: builder.query<any, string>({
       query: (id) => `/questions/${id}`,
+      transformResponse: (response: { question: any }) => response.question,
       providesTags: (_, __, id) => [{ type: 'Question', id }],
     }),
     createQuestion: builder.mutation<any, any>({

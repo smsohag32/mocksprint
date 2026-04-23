@@ -1,22 +1,30 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { deleteCookie, getCookie, setCookie } from "@/helpers/cookie";
-import { loginApi, refreshTokenApi } from "@/services/auth/auth.service";
+import { loginApi, logoutApi, refreshTokenApi } from "@/services/auth/auth.service";
 
+/* ─── Persisted State Hydration ──────────────────────── */
 const getPersistedToken = getCookie("access_token");
-const cookieValue = getCookie("user_info") || "";
-const getPersistedUser = cookieValue ? JSON.parse(cookieValue) : null;
+const rawUserInfo = getCookie("user_info") || "";
+const getPersistedUser = rawUserInfo ? JSON.parse(rawUserInfo) : null;
 
-const initialState: any = {
-   token: getPersistedToken,
+const initialState: {
+   token: string | null;
+   user: any | null;
+   isAuthenticated: boolean;
+   isLoading: boolean;
+   error: string | null;
+} = {
+   token: getPersistedToken || null,
    user: getPersistedUser,
    isAuthenticated: !!getPersistedToken,
    isLoading: false,
    error: null,
 };
 
+/* ─── Async Thunks ───────────────────────────────────── */
 export const loginUser = createAsyncThunk<any, any>(
    "auth/loginUser",
-   async (credentials, { rejectWithValue }: any) => {
+   async (credentials, { rejectWithValue }) => {
       try {
          const response = await loginApi(credentials);
          return response;
@@ -28,7 +36,7 @@ export const loginUser = createAsyncThunk<any, any>(
 
 export const refreshToken = createAsyncThunk<any, void>(
    "auth/refreshToken",
-   async (_, { rejectWithValue }: any) => {
+   async (_, { rejectWithValue }) => {
       try {
          const oldRefreshToken = getCookie("refresh_token");
          if (!oldRefreshToken) throw new Error("No refresh token");
@@ -40,42 +48,62 @@ export const refreshToken = createAsyncThunk<any, void>(
    }
 );
 
+export const logoutUserThunk = createAsyncThunk<void, void>(
+   "auth/logoutUser",
+   async (_, { getState, rejectWithValue }) => {
+      try {
+         const state: any = getState();
+         const token = state.auth?.token;
+         if (token) await logoutApi(token);
+      } catch (error: any) {
+         return rejectWithValue(error?.message || "Logout failed");
+      }
+   }
+);
+
+/* ─── Slice ──────────────────────────────────────────── */
 const authSlice = createSlice({
    name: "auth",
    initialState,
    reducers: {
+      /** Immediately clear state + cookies (used by RTK Query re-auth interceptor) */
       logoutUser: (state) => {
          state.token = null;
          state.user = null;
          state.isAuthenticated = false;
+         state.error = null;
          deleteCookie("access_token");
          deleteCookie("refresh_token");
          deleteCookie("user_info");
       },
-      updateUserSignatureUrl: (state, action) => {
-         if (state.user) {
-            state.user.signatureUrl = action.payload;
-            setCookie("user_info", JSON.stringify(state.user));
-         }
+      /** Used by the base query re-auth interceptor when a new access token is issued */
+      updateToken: (state, action) => {
+         state.token = action.payload;
+         state.isAuthenticated = !!action.payload;
+         setCookie("access_token", action.payload);
       },
+      /** Manually set credentials (e.g., after register + auto-login) */
       setCredentials: (state, action) => {
-         const { user, token } = action.payload;
-         state.user = user;
-         state.token = token;
-         state.isAuthenticated = !!token || !!user;
+         const { user, token, refresh_token } = action.payload;
+         state.user = user ?? state.user;
+         state.token = token ?? state.token;
+         state.isAuthenticated = !!(token ?? state.token);
          if (token) setCookie("access_token", token);
+         if (refresh_token) setCookie("refresh_token", refresh_token);
          if (user) setCookie("user_info", JSON.stringify(user));
       },
       setLoading: (state, action) => {
          state.isLoading = action.payload;
       },
-      updateToken: (state, action) => {
-         state.token = action.payload;
-         state.isAuthenticated = !!action.payload;
-         setCookie("access_token", action.payload);
-      }
+      /** Update specific user fields (e.g., after profile update) */
+      updateUser: (state, action) => {
+         const updatedUser = { ...state.user, ...action.payload };
+         state.user = updatedUser;
+         setCookie("user_info", JSON.stringify(updatedUser));
+      },
    },
    extraReducers: (builder) => {
+      /* ── Login ── */
       builder
          .addCase(loginUser.pending, (state) => {
             state.isLoading = true;
@@ -83,31 +111,49 @@ const authSlice = createSlice({
          })
          .addCase(loginUser.fulfilled, (state, action) => {
             state.isLoading = false;
-            const payloadData = action.payload.data || action.payload;
-            const { token, refresh_token, ...restUserInfo } = payloadData;
-            
-            state.token = token;
-            state.user = restUserInfo;
+            const payload = action.payload?.data ?? action.payload;
+            const { token, refresh_token, user } = payload;
+
+            state.token = token ?? null;
+            state.user = user ?? null;
             state.isAuthenticated = !!token;
+            state.error = null;
 
             if (token) setCookie("access_token", token);
             if (refresh_token) setCookie("refresh_token", refresh_token);
-            if (state.user) setCookie("user_info", JSON.stringify(state.user));
+            if (user) setCookie("user_info", JSON.stringify(user));
          })
          .addCase(loginUser.rejected, (state, action) => {
             state.isLoading = false;
-            state.error = action.payload || "Login failed";
-         })
+            state.error = (action.payload as string) || "Login failed";
+         });
+
+      /* ── Refresh Token ── */
+      builder
          .addCase(refreshToken.fulfilled, (state, action) => {
-            const payloadData = action.payload.data || action.payload;
-            const { token, refresh_token } = payloadData;
-            state.token = token;
+            const payload = action.payload?.data ?? action.payload;
+            const { token, refresh_token } = payload;
+            state.token = token ?? null;
+            state.isAuthenticated = !!token;
             if (token) setCookie("access_token", token);
             if (refresh_token) setCookie("refresh_token", refresh_token);
          })
          .addCase(refreshToken.rejected, (state) => {
             state.token = null;
             state.user = null;
+            state.isAuthenticated = false;
+            deleteCookie("access_token");
+            deleteCookie("refresh_token");
+            deleteCookie("user_info");
+         });
+
+      /* ── Logout ── */
+      builder
+         .addCase(logoutUserThunk.fulfilled, (state) => {
+            state.token = null;
+            state.user = null;
+            state.isAuthenticated = false;
+            state.error = null;
             deleteCookie("access_token");
             deleteCookie("refresh_token");
             deleteCookie("user_info");
@@ -115,5 +161,7 @@ const authSlice = createSlice({
    },
 });
 
-export const { logoutUser, updateUserSignatureUrl, setCredentials, setLoading, updateToken } = authSlice.actions;
+export const { logoutUser, updateToken, setCredentials, setLoading, updateUser } =
+   authSlice.actions;
+
 export default authSlice.reducer;

@@ -35,7 +35,7 @@ export function RootLayout() {
    return (
       <TooltipProvider>
          <Toaster />
-         <Sonner />
+         <Sonner closeButton />
          <Suspense fallback={<LoadingSpinner />}>
             <Outlet />
          </Suspense>
