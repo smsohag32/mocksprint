@@ -17,7 +17,7 @@ const lazyWithRetry = (componentImport: () => Promise<any>) =>
          return component;
       } catch (error) {
          console.error("Dynamic import failed:", error);
-         
+
          const hasRetried = window.sessionStorage.getItem("retry-lazy-load");
          if (!hasRetried) {
             window.sessionStorage.setItem("retry-lazy-load", "true");
@@ -31,6 +31,7 @@ const lazyWithRetry = (componentImport: () => Promise<any>) =>
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import PublicLayout from "@/layouts/PublicLayout";
 import LandingPage from "@/pages/LandingPage";
+import AddQuestionPage from "@/pages/admin/AddQuestionPage";
 
 // Lazy loaded pages
 const LoginPage = lazyWithRetry(() => import("@/pages/LoginPage"));
@@ -45,7 +46,9 @@ const ProfilePage = lazyWithRetry(() => import("@/pages/ProfilePage"));
 const AdminDashboardPage = lazyWithRetry(() => import("@/pages/admin/AdminDashboardPage"));
 const ManageUsersPage = lazyWithRetry(() => import("@/pages/admin/ManageUsersPage"));
 const ManageQuestionsPage = lazyWithRetry(() => import("@/pages/admin/ManageQuestionsPage"));
+
 const ManageInterviewsPage = lazyWithRetry(() => import("@/pages/admin/ManageInterviewsPage"));
+const ManageCategoriesPage = lazyWithRetry(() => import("@/pages/admin/ManageCategoriesPage"));
 const UserDetailsPage = lazyWithRetry(() => import("@/pages/admin/UserDetailsPage"));
 const NotFound = lazyWithRetry(() => import("@/pages/NotFound"));
 
@@ -145,17 +148,38 @@ export const router = createBrowserRouter([
                      },
                      {
                         path: "questions",
-                        element: (
-                           <ProtectedRoute requireAdmin>
-                              <ManageQuestionsPage />
-                           </ProtectedRoute>
-                        ),
+                        children: [
+                           {
+                              index: true,
+                              element: (
+                                 <ProtectedRoute requireAdmin>
+                                    <ManageQuestionsPage />
+                                 </ProtectedRoute>
+                              ),
+                           },
+                           {
+                              path: "add",
+                              element: (
+                                 <ProtectedRoute requireAdmin>
+                                    <AddQuestionPage />
+                                 </ProtectedRoute>
+                              ),
+                           },
+                        ],
                      },
                      {
                         path: "interviews",
                         element: (
                            <ProtectedRoute requireAdmin>
                               <ManageInterviewsPage />
+                           </ProtectedRoute>
+                        ),
+                     },
+                     {
+                        path: "categories",
+                        element: (
+                           <ProtectedRoute requireAdmin>
+                              <ManageCategoriesPage />
                            </ProtectedRoute>
                         ),
                      },

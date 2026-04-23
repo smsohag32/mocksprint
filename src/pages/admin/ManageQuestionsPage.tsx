@@ -1,150 +1,222 @@
 import { useState } from 'react';
-import { DashboardLayout } from '@/layouts/DashboardLayout';
-import { Card, CardContent } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
+import { 
+  useGetQuestionsQuery, 
+  useDeleteQuestionMutation,
+} from "@/api/endpoints/question.api";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Trash2, Pencil } from 'lucide-react';
-import {
-  useGetQuestionsQuery,
-  useCreateQuestionMutation,
-  useUpdateQuestionMutation,
-  useDeleteQuestionMutation,
-} from "@/api/endpoints/question.api";
+import { 
+  Plus, 
+  Trash2, 
+  Search, 
+  MoreVertical, 
+  Edit2, 
+  Eye,
+  Loader2,
+  AlertCircle,
+  FileQuestion,
+  Filter
+} from 'lucide-react';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle 
+} from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 export default function ManageQuestionsPage() {
-  const { data: questions, isLoading } = useGetQuestionsQuery();
-  const [createQuestion, { isLoading: creating }] = useCreateQuestionMutation();
-  const [deleteQuestion] = useDeleteQuestionMutation();
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    difficulty: 'easy',
-    category: 'frontend',
-    starter_code: '',
-    solution: '',
-  });
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
 
-  const handleCreate = async () => {
-    if (!form.title.trim()) return toast.error('Title is required');
-    try {
-      await createQuestion(form as any).unwrap();
-      toast.success('Question created!');
-      setOpen(false);
-      setForm({ title: '', description: '', difficulty: 'easy', category: 'frontend', starter_code: '', solution: '' });
-    } catch {
-      toast.error('Failed to create question');
-    }
-  };
+  const { data: questions, isLoading } = useGetQuestionsQuery({ search: searchTerm });
+  const [deleteQuestion, { isLoading: isDeleting }] = useDeleteQuestionMutation();
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteConfirm = async () => {
+    if (!selectedQuestion) return;
     try {
-      await deleteQuestion(id).unwrap();
-      toast.success('Question deleted');
+      await deleteQuestion(selectedQuestion.id).unwrap();
+      toast.success('Question deleted successfully');
+      setIsDeleteDialogOpen(false);
     } catch {
       toast.error('Failed to delete question');
     }
   };
 
+  const openDeleteDialog = (question: any) => {
+    setSelectedQuestion(question);
+    setIsDeleteDialogOpen(true);
+  };
+
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Manage Questions</h1>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button className="gradient-primary text-primary-foreground gap-2">
-              <Plus className="h-4 w-4" /> Add Question
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>New Question</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Title</Label>
-                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Description</Label>
-                <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Difficulty</Label>
-                  <Select value={form.difficulty} onValueChange={(v) => setForm({ ...form, difficulty: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="easy">Easy</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="hard">Hard</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Category</Label>
-                  <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="frontend">Frontend</SelectItem>
-                      <SelectItem value="backend">Backend</SelectItem>
-                      <SelectItem value="dsa">DSA</SelectItem>
-                      <SelectItem value="system_design">System Design</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Starter Code</Label>
-                <Textarea value={form.starter_code} onChange={(e) => setForm({ ...form, starter_code: e.target.value })} rows={3} className="font-mono text-sm" />
-              </div>
-              <div className="space-y-2">
-                <Label>Solution</Label>
-                <Textarea value={form.solution} onChange={(e) => setForm({ ...form, solution: e.target.value })} rows={3} className="font-mono text-sm" />
-              </div>
-              <Button onClick={handleCreate} disabled={creating} className="w-full gradient-primary text-primary-foreground">
-                {creating ? 'Creating...' : 'Create Question'}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+    <div className="space-y-6 animate-fade-in pb-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight">Question Bank</h1>
+          <p className="text-muted-foreground text-sm">Review and manage all practice questions.</p>
+        </div>
+        <Button 
+          onClick={() => navigate('/admin/questions/add')}
+          className="gradient-primary text-white font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+        >
+          <Plus className="h-4 w-4 mr-2" /> Add Questions
+        </Button>
       </div>
 
-      {isLoading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full" />)}
-        </div>
-      ) : questions?.length ? (
-        <div className="space-y-3">
-          {questions.map((q) => (
-            <Card key={q.id} className="border-border/50">
-              <CardContent className="flex items-center justify-between p-4">
-                <div>
-                  <p className="font-medium">{q.title}</p>
-                  <div className="flex gap-2 mt-1">
-                    <Badge variant="outline" className="capitalize">{q.difficulty}</Badge>
-                    <Badge variant="outline" className="capitalize">{q.category.replace('_', ' ')}</Badge>
-                  </div>
-                </div>
-                <Button variant="ghost" size="icon" onClick={() => handleDelete(q.id)} className="text-destructive">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Card className="border-border/50">
-          <CardContent className="text-center py-12 text-muted-foreground">No questions yet. Add one!</CardContent>
-        </Card>
-      )}
+      <Card className="border-border/50 shadow-xl bg-card/50 backdrop-blur-sm overflow-hidden">
+        <CardHeader className="bg-muted/30 border-b border-border/50">
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <div className="relative flex-1 w-full md:max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search by title..." 
+                className="pl-10 bg-background/50 border-border/50 h-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-2 ml-auto w-full md:w-auto">
+               <Button variant="outline" size="sm" className="h-10 px-4 font-bold border-border/50">
+                 <Filter className="h-4 w-4 mr-2" /> Filter
+               </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader className="bg-muted/20">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="font-bold py-4 pl-6">Question Details</TableHead>
+                <TableHead className="font-bold">Category</TableHead>
+                <TableHead className="font-bold">Difficulty</TableHead>
+                <TableHead className="font-bold">Created</TableHead>
+                <TableHead className="font-bold text-right pr-6">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-64 text-center">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+                    <p className="text-sm text-muted-foreground mt-2">Fetching questions...</p>
+                  </TableCell>
+                </TableRow>
+              ) : !questions || questions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-64 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <FileQuestion className="h-10 w-10 text-muted-foreground/30" />
+                      <p className="text-muted-foreground font-medium">No questions found.</p>
+                      {searchTerm && <Button variant="link" onClick={() => setSearchTerm('')}>Clear search</Button>}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                questions.map((q: any) => (
+                  <TableRow key={q.id} className="hover:bg-muted/10 transition-colors group">
+                    <TableCell className="py-4 pl-6">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-bold text-foreground group-hover:text-primary transition-colors cursor-pointer">
+                          {q.title}
+                        </span>
+                        <span className="text-xs text-muted-foreground line-clamp-1 max-w-xs">
+                          {q.description}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className="bg-muted font-bold text-[10px] uppercase tracking-wider">
+                        {q.category?.name || 'Uncategorized'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={cn(
+                        "text-[10px] uppercase font-black px-2 py-0.5",
+                        q.difficulty === 'easy' ? "bg-emerald-500/10 text-emerald-500" :
+                        q.difficulty === 'medium' ? "bg-amber-500/10 text-amber-500" :
+                        "bg-rose-500/10 text-rose-500"
+                      )}>
+                        {q.difficulty}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground tabular-nums">
+                      {new Date(q.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-right pr-6">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 shadow-xl border-border/50">
+                          <DropdownMenuItem className="cursor-pointer">
+                            <Eye className="h-4 w-4 mr-2" /> View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="cursor-pointer">
+                            <Edit2 className="h-4 w-4 mr-2 text-primary" /> Edit Question
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openDeleteDialog(q)} className="cursor-pointer text-destructive focus:text-destructive">
+                            <Trash2 className="h-4 w-4 mr-2" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent className="max-w-md border-destructive/20 shadow-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold">Delete Question?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove <span className="font-bold text-foreground">"{selectedQuestion?.title}"</span>. 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel className="font-bold">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm}
+              className="bg-destructive hover:bg-destructive/90 font-bold"
+              disabled={isDeleting}
+            >
+              {isDeleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
+              Yes, Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -11,6 +11,7 @@ import {
    BarChart3,
    ChevronRight,
    ChevronLeft,
+   FolderTree,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAppSelector } from "@/store/hooks";
@@ -34,7 +35,15 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import Logo from "@/assets/logo/Logo";
 import { cn } from "@/lib/utils";
 
-const mainItems = [
+interface SidebarItem {
+   title: string;
+   url?: string;
+   icon: any;
+   badge?: string;
+   items?: { title: string; url: string; icon: any }[];
+}
+
+const mainItems: SidebarItem[] = [
    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
    {
       title: "Practice",
@@ -48,12 +57,19 @@ const mainItems = [
    { title: "History", url: "/history", icon: History, badge: "New" },
 ];
 
-const accountItems = [{ title: "Profile", url: "/profile", icon: User }];
+const accountItems: SidebarItem[] = [{ title: "Profile", url: "/profile", icon: User }];
 
-const adminItems = [
+const adminItems: SidebarItem[] = [
    { title: "Admin Dashboard", url: "/admin", icon: BarChart3 },
    { title: "Manage Users", url: "/admin/users", icon: Users },
-   { title: "Manage Questions", url: "/admin/questions", icon: FileQuestion },
+   {
+      title: "Question Management",
+      icon: FileQuestion,
+      items: [
+         { title: "Question Bank", url: "/admin/questions", icon: BookOpen },
+         { title: "Categories", url: "/admin/categories", icon: FolderTree },
+      ],
+   },
    { title: "Manage Interviews", url: "/admin/interviews", icon: Shield },
 ];
 
@@ -183,20 +199,51 @@ export function AppSidebar() {
                      <SidebarMenu>
                         {adminItems.map((item) => (
                            <SidebarMenuItem key={item.title}>
-                              <SidebarMenuButton
-                                 asChild
-                                 isActive={isActive(item.url)}
-                                 tooltip={item.title}>
-                                 <NavLink to={item.url}>
-                                    <item.icon className="h-4 w-4" />
-                                    <span>{item.title}</span>
-                                    {item.badge && (
-                                       <SidebarMenuBadge className="bg-destructive/10 text-destructive font-bold group-data-[collapsible=icon]:hidden">
-                                          {item.badge}
-                                       </SidebarMenuBadge>
-                                    )}
-                                 </NavLink>
-                              </SidebarMenuButton>
+                              {item.items ? (
+                                 <Collapsible
+                                    asChild
+                                    className="group/collapsible">
+                                    <div>
+                                       <CollapsibleTrigger asChild>
+                                          <SidebarMenuButton tooltip={item.title}>
+                                             <item.icon className="h-4 w-4" />
+                                             <span>{item.title}</span>
+                                             <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
+                                          </SidebarMenuButton>
+                                       </CollapsibleTrigger>
+                                       <CollapsibleContent>
+                                          <SidebarMenuSub>
+                                             {item.items.map((subItem) => (
+                                                <SidebarMenuSubItem key={subItem.title}>
+                                                   <SidebarMenuSubButton
+                                                      asChild
+                                                      isActive={isActive(subItem.url)}>
+                                                      <NavLink to={subItem.url}>
+                                                         <span>{subItem.title}</span>
+                                                      </NavLink>
+                                                   </SidebarMenuSubButton>
+                                                </SidebarMenuSubItem>
+                                             ))}
+                                          </SidebarMenuSub>
+                                       </CollapsibleContent>
+                                    </div>
+                                 </Collapsible>
+                              ) : (
+                                 <SidebarMenuButton
+                                    asChild
+                                    isActive={isActive(item.url || "")}
+                                    tooltip={item.title}>
+                                    <NavLink to={item.url || ""}>
+                                       <item.icon className="h-4 w-4" />
+                                       <span>{item.title}</span>
+                                       {item.badge && (
+                                          <SidebarMenuBadge className="bg-destructive/10 text-destructive font-bold group-data-[collapsible=icon]:hidden">
+                                             {item.badge}
+                                          </SidebarMenuBadge>
+                                       )}
+                                    </NavLink>
+                                 </SidebarMenuButton>
+                              )}
                            </SidebarMenuItem>
                         ))}
                      </SidebarMenu>

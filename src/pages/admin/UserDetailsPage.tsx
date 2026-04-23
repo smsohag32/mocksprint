@@ -22,8 +22,20 @@ import {
   History,
   CheckCircle2,
   Trophy,
-  Loader2
+  Loader2,
+  AlertTriangle
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { getImageUrl } from '@/lib/image-utils';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -48,7 +60,6 @@ export default function UserDetailsPage() {
 
   const handleDelete = async () => {
     if (!user) return;
-    if (!confirm('Are you sure you want to PERMANENTLY delete this user? This cannot be undone.')) return;
     try {
       await deleteUser(user.id).unwrap();
       toast.success('User deleted successfully');
@@ -101,15 +112,49 @@ export default function UserDetailsPage() {
             )}
             {user.status === 'active' ? 'Deactivate' : 'Activate'}
           </Button>
-          <Button 
-            variant="destructive" 
-            className="h-10 px-4 font-bold"
-            onClick={handleDelete}
-            disabled={deleting}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete Account
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="destructive" 
+                className="h-10 px-4 font-bold"
+                disabled={deleting}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Account
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="max-w-md border-destructive/20 shadow-2xl">
+              <AlertDialogHeader>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center text-destructive">
+                    <AlertTriangle className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <AlertDialogTitle className="text-xl font-bold">Confirm Deletion</AlertDialogTitle>
+                    <AlertDialogDescription className="text-sm">
+                      This action is permanent and cannot be undone.
+                    </AlertDialogDescription>
+                  </div>
+                </div>
+              </AlertDialogHeader>
+              <div className="py-4 px-1">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Are you sure you want to delete <span className="font-bold text-foreground">{user.name}</span>'s account? All associated data will be removed from the system forever.
+                </p>
+              </div>
+              <AlertDialogFooter className="gap-2 sm:gap-0">
+                <AlertDialogCancel className="font-bold">Cancel</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleDelete}
+                  className="bg-destructive hover:bg-destructive/90 font-bold"
+                  disabled={deleting}
+                >
+                  {deleting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                  Yes, Delete Account
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
