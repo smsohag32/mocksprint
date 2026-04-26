@@ -21,15 +21,15 @@ export default function HistoryPage() {
             <Card key={h.id} className="border-border/50">
               <CardContent className="flex items-center justify-between p-4">
                 <div>
-                  <p className="font-medium">{h.questions?.title || 'Interview Session'}</p>
+                  <p className="font-medium">{h.question?.title || 'Interview Session'}</p>
                   <p className="text-sm text-muted-foreground">
-                    {new Date(h.started_at).toLocaleDateString()} · {new Date(h.started_at).toLocaleTimeString()}
+                    {new Date(h.createdAt).toLocaleDateString()} · {new Date(h.createdAt).toLocaleTimeString()}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  {h.completed_at && (
+                  {h.status === "completed" && (
                     <span className="text-xs text-muted-foreground">
-                      {Math.round((new Date(h.completed_at).getTime() - new Date(h.started_at).getTime()) / 60000)} min
+                      {Math.round((new Date(h.updatedAt).getTime() - new Date(h.createdAt).getTime()) / 60000)} min
                     </span>
                   )}
                   <Badge variant={h.status === 'completed' ? 'default' : h.status === 'abandoned' ? 'destructive' : 'secondary'}>

@@ -429,7 +429,7 @@ export default function ProfilePage() {
                                  className="p-4 hover:bg-muted/30 transition-colors flex items-center justify-between cursor-default">
                                  <div className="flex flex-col gap-1">
                                     <span className="text-sm font-bold truncate max-w-[140px] tracking-tight">
-                                       {s.questions?.title || "Practice Sessions"}
+                                       {s.question?.title || "Practice Sessions"}
                                     </span>
                                     <span className="text-[10px] text-muted-foreground font-medium">
                                        {new Date(s.createdAt || s.created_at).toLocaleDateString()}

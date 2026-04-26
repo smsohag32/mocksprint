@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   useGetQuestionsQuery, 
+  useUpdateQuestionMutation,
   useDeleteQuestionMutation,
 } from "@/api/endpoints/question.api";
+import { useGetCategoriesQuery } from '@/api/endpoints/questionCategory.api';
 import { 
   Table, 
   TableBody, 
@@ -23,10 +25,18 @@ import {
   MoreVertical, 
   Edit2, 
   Eye,
-  Loader2,
-  AlertCircle,
   FileQuestion,
-  Filter
+  Filter,
+  CheckCircle2,
+  Code2,
+  BookOpen,
+  Trophy,
+  History,
+  X,
+  Copy,
+  ExternalLink,
+  ChevronRight,
+  Loader2
 } from 'lucide-react';
 import { 
   DropdownMenu, 
@@ -44,6 +54,24 @@ import {
   AlertDialogHeader, 
   AlertDialogTitle 
 } from '@/components/ui/alert-dialog';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle 
+} from '@/components/ui/dialog';
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetDescription, 
+  SheetHeader, 
+  SheetTitle 
+} from '@/components/ui/sheet';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -51,10 +79,13 @@ export default function ManageQuestionsPage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
-
+  
   const { data: questions, isLoading } = useGetQuestionsQuery({ search: searchTerm });
   const [deleteQuestion, { isLoading: isDeleting }] = useDeleteQuestionMutation();
+
+  const categories = []; // Not needed in this page anymore
 
   const handleDeleteConfirm = async () => {
     if (!selectedQuestion) return;
@@ -72,6 +103,11 @@ export default function ManageQuestionsPage() {
     setIsDeleteDialogOpen(true);
   };
 
+  const openDetails = (question: any) => {
+    setSelectedQuestion(question);
+    setIsDetailsOpen(true);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in pb-10">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -80,7 +116,7 @@ export default function ManageQuestionsPage() {
           <p className="text-muted-foreground text-sm">Review and manage all practice questions.</p>
         </div>
         <Button 
-          onClick={() => navigate('/admin/questions/add')}
+          onClick={() => navigate('/administrator/questions/add')}
           className="gradient-primary text-white font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
         >
           <Plus className="h-4 w-4 mr-2" /> Add Questions
@@ -139,9 +175,13 @@ export default function ManageQuestionsPage() {
                 questions.map((q: any) => (
                   <TableRow key={q.id} className="hover:bg-muted/10 transition-colors group">
                     <TableCell className="py-4 pl-6">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-bold text-foreground group-hover:text-primary transition-colors cursor-pointer">
+                      <div 
+                        className="flex flex-col gap-0.5 cursor-pointer group/title"
+                        onClick={() => openDetails(q)}
+                      >
+                        <span className="font-bold text-foreground group-hover/title:text-primary transition-colors flex items-center gap-2">
                           {q.title}
+                          <ExternalLink className="h-3 w-3 opacity-0 group-hover/title:opacity-100 transition-opacity" />
                         </span>
                         <span className="text-xs text-muted-foreground line-clamp-1 max-w-xs">
                           {q.description}
@@ -174,10 +214,10 @@ export default function ManageQuestionsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 shadow-xl border-border/50">
-                          <DropdownMenuItem className="cursor-pointer">
+                          <DropdownMenuItem onClick={() => openDetails(q)} className="cursor-pointer">
                             <Eye className="h-4 w-4 mr-2" /> View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="cursor-pointer">
+                          <DropdownMenuItem onClick={() => navigate(`/administrator/questions/edit/${q.id}`)} className="cursor-pointer">
                             <Edit2 className="h-4 w-4 mr-2 text-primary" /> Edit Question
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openDeleteDialog(q)} className="cursor-pointer text-destructive focus:text-destructive">
@@ -217,6 +257,151 @@ export default function ManageQuestionsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Details Sheet */}
+      <Sheet open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <SheetContent className="sm:max-w-2xl overflow-y-auto p-0 border-l border-border/50">
+          <div className="relative h-32 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-b border-border/50">
+            <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Badge className={cn(
+                    "text-[10px] uppercase font-black px-2 py-0.5",
+                    selectedQuestion?.difficulty === 'easy' ? "bg-emerald-500/10 text-emerald-500" :
+                    selectedQuestion?.difficulty === 'medium' ? "bg-amber-500/10 text-amber-500" :
+                    "bg-rose-500/10 text-rose-500"
+                  )}>
+                    {selectedQuestion?.difficulty}
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px] uppercase font-bold border-primary/20 text-primary">
+                    {selectedQuestion?.category?.name}
+                  </Badge>
+                </div>
+                <h2 className="text-2xl font-black tracking-tight">{selectedQuestion?.title}</h2>
+              </div>
+              <div className="flex gap-2">
+                 <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="h-8 rounded-full border-border/50 hover:bg-background"
+                    onClick={() => {
+                        setIsDetailsOpen(false);
+                        navigate(`/administrator/questions/edit/${selectedQuestion?.id}`);
+                    }}
+                 >
+                    <Edit2 className="h-3 w-3 mr-1" /> Edit
+                 </Button>
+              </div>
+            </div>
+          </div>
+          
+          <div className="p-6 space-y-8 pb-20">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-primary">
+                <BookOpen className="h-4 w-4" />
+                <h3 className="text-sm font-bold uppercase tracking-widest">Question Context</h3>
+              </div>
+              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground leading-relaxed">
+                {selectedQuestion?.description}
+              </div>
+            </div>
+
+            {selectedQuestion?.starter_code && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-blue-500">
+                    <Code2 className="h-4 w-4" />
+                    <h3 className="text-sm font-bold uppercase tracking-widest">Starter Code</h3>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 text-[10px] uppercase font-bold"
+                    onClick={() => {
+                        navigator.clipboard.writeText(selectedQuestion.starter_code);
+                        toast.success('Starter code copied!');
+                    }}
+                  >
+                    <Copy className="h-3 w-3 mr-1" /> Copy
+                  </Button>
+                </div>
+                <div className="group relative">
+                  <pre className="bg-slate-950 text-slate-200 p-5 rounded-xl overflow-x-auto text-[13px] font-mono border border-slate-800 leading-relaxed shadow-inner">
+                    {selectedQuestion?.starter_code}
+                  </pre>
+                </div>
+              </div>
+            )}
+
+            {selectedQuestion?.solution && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-emerald-500">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <h3 className="text-sm font-bold uppercase tracking-widest text-emerald-500">Official Solution</h3>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 text-[10px] uppercase font-bold text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/5"
+                    onClick={() => {
+                        navigator.clipboard.writeText(selectedQuestion.solution);
+                        toast.success('Solution copied!');
+                    }}
+                  >
+                    <Copy className="h-3 w-3 mr-1" /> Copy
+                  </Button>
+                </div>
+                <div className="group relative">
+                  <pre className="bg-slate-950 text-emerald-50/90 p-5 rounded-xl overflow-x-auto text-[13px] font-mono border border-emerald-900/20 leading-relaxed shadow-inner">
+                    {selectedQuestion?.solution}
+                  </pre>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4 pt-4">
+              <div className="bg-muted/30 p-4 rounded-xl flex items-center gap-4 border border-border/50">
+                <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center border border-border/50">
+                  <History className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase font-black text-muted-foreground tracking-tighter">Registered On</p>
+                  <p className="text-sm font-bold text-foreground">
+                    {selectedQuestion && new Date(selectedQuestion.createdAt).toLocaleDateString('en-US', {
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric'
+                    })}
+                  </p>
+                </div>
+              </div>
+              <div className="bg-muted/30 p-4 rounded-xl flex items-center gap-4 border border-border/50">
+                <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center border border-border/50">
+                  <Trophy className="h-5 w-5 text-amber-500" />
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase font-black text-muted-foreground tracking-tighter">Level Rank</p>
+                  <p className="text-sm font-bold text-foreground capitalize">{selectedQuestion?.difficulty}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="pt-8 border-t border-border/50">
+                <Button 
+                    variant="destructive" 
+                    className="w-full font-bold h-11 rounded-xl shadow-lg shadow-destructive/10"
+                    onClick={() => {
+                        setIsDetailsOpen(false);
+                        openDeleteDialog(selectedQuestion);
+                    }}
+                >
+                    <Trash2 className="h-4 w-4 mr-2" /> Delete This Question
+                </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

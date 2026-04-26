@@ -31,7 +31,8 @@ const lazyWithRetry = (componentImport: () => Promise<any>) =>
 import { DashboardLayout } from "@/layouts/DashboardLayout";
 import PublicLayout from "@/layouts/PublicLayout";
 import LandingPage from "@/pages/LandingPage";
-import AddQuestionPage from "@/pages/admin/AddQuestionPage";
+
+import ManageUsersPage from "@/pages/administrator/user_management/ManageUsersPage";
 
 // Lazy loaded pages
 const LoginPage = lazyWithRetry(() => import("@/pages/LoginPage"));
@@ -43,13 +44,13 @@ const QuestionsPage = lazyWithRetry(() => import("@/pages/QuestionsPage"));
 const LeaderboardPage = lazyWithRetry(() => import("@/pages/LeaderboardPage"));
 const HistoryPage = lazyWithRetry(() => import("@/pages/HistoryPage"));
 const ProfilePage = lazyWithRetry(() => import("@/pages/ProfilePage"));
-const AdminDashboardPage = lazyWithRetry(() => import("@/pages/admin/AdminDashboardPage"));
-const ManageUsersPage = lazyWithRetry(() => import("@/pages/admin/ManageUsersPage"));
-const ManageQuestionsPage = lazyWithRetry(() => import("@/pages/admin/ManageQuestionsPage"));
-
-const ManageInterviewsPage = lazyWithRetry(() => import("@/pages/admin/ManageInterviewsPage"));
-const ManageCategoriesPage = lazyWithRetry(() => import("@/pages/admin/ManageCategoriesPage"));
-const UserDetailsPage = lazyWithRetry(() => import("@/pages/admin/UserDetailsPage"));
+const AdminDashboardPage = lazyWithRetry(() => import("@/pages/administrator/dashboard/AdminDashboardPage"));
+const ManageQuestionsPage = lazyWithRetry(() => import("@/pages/administrator/question_management/ManageQuestionsPage"));
+const AddQuestionPage = lazyWithRetry(() => import("@/pages/administrator/question_management/AddQuestionPage"));
+const EditQuestionPage = lazyWithRetry(() => import("@/pages/administrator/question_management/EditQuestionPage"));
+const ManageInterviewsPage = lazyWithRetry(() => import("@/pages/administrator/interview_management/ManageInterviewsPage"));
+const ManageCategoriesPage = lazyWithRetry(() => import("@/pages/administrator/category_management/ManageCategoriesPage"));
+const UserDetailsPage = lazyWithRetry(() => import("@/pages/administrator/user_management/UserDetailsPage"));
 const NotFound = lazyWithRetry(() => import("@/pages/NotFound"));
 
 /**
@@ -115,7 +116,7 @@ export const router = createBrowserRouter([
                   element: <ProfilePage />,
                },
                {
-                  path: "admin",
+                  path: "administrator",
                   children: [
                      {
                         index: true,
@@ -162,6 +163,14 @@ export const router = createBrowserRouter([
                               element: (
                                  <ProtectedRoute requireAdmin>
                                     <AddQuestionPage />
+                                 </ProtectedRoute>
+                              ),
+                           },
+                           {
+                              path: "edit/:id",
+                              element: (
+                                 <ProtectedRoute requireAdmin>
+                                    <EditQuestionPage />
                                  </ProtectedRoute>
                               ),
                            },

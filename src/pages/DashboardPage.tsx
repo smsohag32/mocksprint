@@ -75,9 +75,9 @@ export default function DashboardPage() {
                 {history.slice(0, 5).map((h: any) => (
                   <div key={h.id} className="flex items-center justify-between rounded-lg border border-border/50 p-3">
                     <div>
-                      <p className="font-medium text-sm">{h.questions?.title || 'Interview'}</p>
+                      <p className="font-medium text-sm">{h.question?.title || 'Interview'}</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(h.started_at).toLocaleDateString()}
+                        {new Date(h.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                     <Badge variant={h.status === 'completed' ? 'default' : 'secondary'}>
