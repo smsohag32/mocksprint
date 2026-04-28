@@ -36,6 +36,9 @@ import {
    XCircle,
    ArrowRight,
    LayoutDashboard,
+   Sparkles,
+   Lightbulb,
+   MessageSquare,
 } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { useGetQuestionsQuery } from "@/api/endpoints/question.api";
@@ -43,6 +46,7 @@ import { useGetCategoriesQuery } from "@/api/endpoints/questionCategory.api";
 import {
    useStartInterviewMutation,
    useSubmitInterviewMutation,
+   useGetHintMutation,
 } from "@/api/endpoints/interview.api";
 import { useAppSelector } from "@/store/hooks";
 import { toast } from "sonner";
@@ -64,7 +68,13 @@ export default function InterviewPage() {
    const [isRunning, setIsRunning] = useState(false);
    const [timeLeft, setTimeLeft] = useState(1800);
    const [pressureMode, setPressureMode] = useState(false);
-   const [submissionResult, setSubmissionResult] = useState<{ score: number } | null>(null);
+   const [isEvaluating, setIsEvaluating] = useState(false);
+   const [submissionResult, setSubmissionResult] = useState<{ 
+      score: number; 
+      feedback?: string; 
+      interviewerMessage?: string;
+   } | null>(null);
+   const [getHint, { isLoading: isHintLoading }] = useGetHintMutation();
 
    // Auto-load question from URL query ?q=...
    useEffect(() => {
@@ -132,17 +142,39 @@ export default function InterviewPage() {
    const handleSubmit = async () => {
       if (!interviewId || !selectedQuestion) return;
       setIsRunning(false);
+      setIsEvaluating(true);
       try {
          const result = await submitInterview({
             id: interviewId,
             code,
          }).unwrap();
-         setSubmissionResult({ score: result.score });
-         toast.success("Submission completed successfully!");
+         setSubmissionResult({ 
+            score: result.score, 
+            feedback: result.feedback, 
+            interviewerMessage: result.interviewerMessage 
+         });
+         toast.success("Solution evaluated successfully!");
          setInterviewId(null);
       } catch {
-         toast.error("Submission failed");
+         toast.error("Evaluation failed");
          setIsRunning(true);
+      } finally {
+         setIsEvaluating(false);
+      }
+   };
+
+   const handleGetHint = async () => {
+      if (!interviewId) return;
+      try {
+         const result = await getHint({ id: interviewId, code }).unwrap();
+         if (result.hint) {
+            toast(result.hint, {
+               icon: <Lightbulb className="h-4 w-4 text-amber-500" />,
+               duration: 10000,
+            });
+         }
+      } catch {
+         // Silently skip if it fails as per user request
       }
    };
 
@@ -342,18 +374,43 @@ export default function InterviewPage() {
                               <Play className="h-4 w-4" /> Start Session
                            </Button>
                         ) : (
-                           <div className="flex w-full gap-2">
-                              <Button
-                                 onClick={handleReset}
-                                 variant="outline"
-                                 className="flex-1 font-bold border-border/60 h-11">
-                                 <RotateCcw className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                 onClick={handleSubmit}
-                                 className="flex-[2] gradient-primary text-white font-bold shadow-lg shadow-primary/20 h-11 gap-2">
-                                 <Send className="h-4 w-4" /> Finish
-                              </Button>
+                           <div className="flex flex-col w-full gap-2">
+                              <div className="flex w-full gap-2">
+                                 <Button
+                                    onClick={handleReset}
+                                    variant="outline"
+                                    className="flex-1 font-bold border-border/60 h-11">
+                                    <RotateCcw className="h-4 w-4" />
+                                 </Button>
+                                 <Button
+                                    onClick={handleSubmit}
+                                    disabled={isEvaluating}
+                                    className="flex-[2] gradient-primary text-white font-bold shadow-lg shadow-primary/20 h-11 gap-2">
+                                    {isEvaluating ? (
+                                       <>
+                                          <Loader2 className="h-4 w-4 animate-spin" /> Evaluating...
+                                       </>
+                                    ) : (
+                                       <>
+                                          <Send className="h-4 w-4" /> Finish
+                                       </>
+                                    )}
+                                 </Button>
+                              </div>
+                              {isRunning && (
+                                 <Button
+                                    variant="secondary"
+                                    onClick={handleGetHint}
+                                    disabled={isHintLoading}
+                                    className="w-full font-bold h-10 gap-2 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-amber-500/20">
+                                    {isHintLoading ? (
+                                       <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                       <Sparkles className="h-4 w-4" />
+                                    )}
+                                    Ask for AI Hint
+                                 </Button>
+                              )}
                            </div>
                         )}
                      </div>
@@ -434,6 +491,23 @@ export default function InterviewPage() {
                         {submissionResult?.score}%
                      </div>
                   </div>
+
+                  {submissionResult?.feedback && (
+                     <div className="text-left space-y-3 bg-primary/5 p-4 rounded-xl border border-primary/10">
+                        <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                           <MessageSquare className="h-4 w-4" /> Interviewer Feedback
+                        </div>
+                        <div className="text-xs text-muted-foreground prose prose-invert max-h-[150px] overflow-y-auto pr-2 scrollbar-thin">
+                           {submissionResult.feedback}
+                        </div>
+                     </div>
+                  )}
+
+                  {submissionResult?.interviewerMessage && (
+                     <p className="text-xs italic text-muted-foreground">
+                        "{submissionResult.interviewerMessage}"
+                     </p>
+                  )}
 
                   <DialogFooter className="flex-col sm:flex-row gap-3 pt-4 sm:justify-center border-t border-border/40 mt-4">
                      <Button
