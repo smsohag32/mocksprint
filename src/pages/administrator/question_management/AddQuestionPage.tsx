@@ -68,7 +68,7 @@ export default function AddQuestionPage() {
     try {
       await createQuestions(questions).unwrap();
       toast.success('Questions added successfully');
-      navigate('/admin/questions');
+      navigate('/administrator/questions');
     } catch (err: any) {
       toast.error(err.data?.message || 'Failed to add questions');
     }
@@ -78,7 +78,7 @@ export default function AddQuestionPage() {
     <div className="max-w-5xl mx-auto space-y-8 animate-fade-in pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/admin/questions')} className="rounded-full">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/administrator/questions')} className="rounded-full">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>

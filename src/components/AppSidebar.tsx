@@ -60,17 +60,17 @@ const mainItems: SidebarItem[] = [
 const accountItems: SidebarItem[] = [{ title: "Profile", url: "/profile", icon: User }];
 
 const adminItems: SidebarItem[] = [
-   { title: "Admin Dashboard", url: "/admin", icon: BarChart3 },
-   { title: "Manage Users", url: "/admin/users", icon: Users },
+   { title: "Admin Dashboard", url: "/administrator", icon: BarChart3 },
+   { title: "Manage Users", url: "/administrator/users", icon: Users },
    {
       title: "Question Management",
       icon: FileQuestion,
       items: [
-         { title: "Question Bank", url: "/admin/questions", icon: BookOpen },
-         { title: "Categories", url: "/admin/categories", icon: FolderTree },
+         { title: "Question Bank", url: "/administrator/questions", icon: BookOpen },
+         { title: "Categories", url: "/administrator/categories", icon: FolderTree },
       ],
    },
-   { title: "Manage Interviews", url: "/admin/interviews", icon: Shield },
+   { title: "Manage Interviews", url: "/administrator/interviews", icon: Shield },
 ];
 
 export function AppSidebar() {

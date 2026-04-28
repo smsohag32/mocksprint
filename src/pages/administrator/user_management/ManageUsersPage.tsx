@@ -251,7 +251,7 @@ export default function ManageUsersPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-52 p-2 shadow-xl border-border/50">
                             <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground px-2 py-1.5">User Control</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => navigate(`/admin/users/${u.id}`)} className="rounded-md focus:bg-primary/10 focus:text-primary transition-colors cursor-pointer">
+                            <DropdownMenuItem onClick={() => navigate(`/administrator/users/${u.id}`)} className="rounded-md focus:bg-primary/10 focus:text-primary transition-colors cursor-pointer">
                               <UserSearch className="mr-3 h-4 w-4" /> View Full Details
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleEditOpen(u)} className="rounded-md focus:bg-primary/10 focus:text-primary transition-colors cursor-pointer">

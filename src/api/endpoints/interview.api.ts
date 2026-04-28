@@ -44,6 +44,13 @@ export const interviewApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (_, __, id) => [{ type: 'Interview', id }],
     }),
+    getHint: builder.mutation<{ hint: string }, { id: string; code: string }>({
+      query: ({ id, ...body }) => ({
+        url: `/interviews/${id}/hint`,
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
 });
 
@@ -55,4 +62,5 @@ export const {
   useStartInterviewMutation,
   useSubmitInterviewMutation,
   useAbandonInterviewMutation,
+  useGetHintMutation,
 } = interviewApi;

@@ -63,7 +63,7 @@ export default function UserDetailsPage() {
     try {
       await deleteUser(user.id).unwrap();
       toast.success('User deleted successfully');
-      navigate('/admin/users');
+      navigate('/administrator/users');
     } catch {
       toast.error('Failed to delete user');
     }
@@ -82,7 +82,7 @@ export default function UserDetailsPage() {
   if (error || !user) return (
     <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
       <p className="text-muted-foreground">User not found or an error occurred.</p>
-      <Button onClick={() => navigate('/admin/users')}>Back to Users</Button>
+      <Button onClick={() => navigate('/administrator/users')}>Back to Users</Button>
     </div>
   );
 
@@ -92,7 +92,7 @@ export default function UserDetailsPage() {
     <div className="space-y-8 animate-fade-in max-w-5xl mx-auto pb-10">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/admin/users')} className="rounded-full">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/administrator/users')} className="rounded-full">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
