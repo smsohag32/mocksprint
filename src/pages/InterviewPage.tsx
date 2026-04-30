@@ -75,6 +75,7 @@ export default function InterviewPage() {
       interviewerMessage?: string;
    } | null>(null);
    const [getHint, { isLoading: isHintLoading }] = useGetHintMutation();
+   const [hints, setHints] = useState<string[]>([]);
 
    // Auto-load question from URL query ?q=...
    useEffect(() => {
@@ -85,8 +86,6 @@ export default function InterviewPage() {
             if (q) {
                setSelectedQuestion(q);
                setCode(q.starter_code || "// Start coding here\n");
-               // Automatically start session if it's a direct link?
-               // For now just select it.
             }
          }
       }
@@ -133,6 +132,7 @@ export default function InterviewPage() {
          setCode(selectedQuestion.starter_code || "// Start coding here\n");
          setTimeLeft(1800);
          setIsRunning(true);
+         setHints([]); // Clear previous hints
          toast.success("Interview started!");
       } catch {
          toast.error("Failed to start interview");
@@ -168,13 +168,17 @@ export default function InterviewPage() {
       try {
          const result = await getHint({ id: interviewId, code }).unwrap();
          if (result.hint) {
-            toast(result.hint, {
+            setHints(prev => [...prev, result.hint]);
+            toast("New Hint Received!", {
                icon: <Lightbulb className="h-4 w-4 text-amber-500" />,
+               description: result.hint,
                duration: 10000,
             });
+         } else if (result.error) {
+            toast.error(result.error);
          }
-      } catch {
-         // Silently skip if it fails as per user request
+      } catch (err: any) {
+         toast.error("Failed to connect to AI service");
       }
    };
 
@@ -416,6 +420,27 @@ export default function InterviewPage() {
                      </div>
                   </CardContent>
                </Card>
+
+               {/* Hints Panel */}
+               {isRunning && hints.length > 0 && (
+                  <Card className="border-border/50 shadow-sm bg-amber-500/5 backdrop-blur-sm animate-in slide-in-from-bottom-4 duration-500">
+                     <CardHeader className="pb-2">
+                        <div className="flex items-center gap-2 text-amber-600">
+                           <Lightbulb className="h-4 w-4" />
+                           <CardTitle className="text-xs font-black uppercase tracking-widest">
+                              AI Hints ({hints.length})
+                           </CardTitle>
+                        </div>
+                     </CardHeader>
+                     <CardContent className="space-y-3">
+                        {hints.map((hint, i) => (
+                           <div key={i} className="text-xs p-3 bg-background/50 rounded-lg border border-amber-500/10 text-muted-foreground leading-relaxed animate-in fade-in slide-in-from-left-2 duration-300">
+                              {hint}
+                           </div>
+                        ))}
+                     </CardContent>
+                  </Card>
+               )}
             </div>
 
             <Card className="lg:col-span-3 border-border/50 overflow-hidden shadow-lg relative group">
