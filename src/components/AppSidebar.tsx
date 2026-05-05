@@ -12,6 +12,7 @@ import {
    ChevronRight,
    ChevronLeft,
    FolderTree,
+   FileText,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAppSelector } from "@/store/hooks";
@@ -71,6 +72,7 @@ const adminItems: SidebarItem[] = [
       ],
    },
    { title: "Manage Interviews", url: "/administrator/interviews", icon: Shield },
+   { title: "Manage Blogs", url: "/administrator/blogs", icon: FileText },
 ];
 
 export function AppSidebar() {

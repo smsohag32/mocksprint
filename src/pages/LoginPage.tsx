@@ -88,9 +88,9 @@ export default function LoginPage() {
             <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-64 w-64 rounded-full bg-white/5 blur-2xl" />
 
             {/* ── Top: Logo ── */}
-            <div className="relative">
-               <Logo className="w-40 brightness-0 invert drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
-            </div>
+            <Link to="/" className="relative block w-max">
+               <Logo className="w-40 brightness-0 invert drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] hover:brightness-110 transition-all" />
+            </Link>
 
             {/* ── Middle: Floating preview card ── */}
             <div className="relative flex flex-col items-center gap-6">
@@ -193,7 +193,7 @@ export default function LoginPage() {
          <div className="flex w-full flex-col items-center justify-center bg-background px-6 py-12 lg:w-1/2 lg:px-16">
             <div className="w-full max-w-md animate-fade-in">
                {/* Mobile logo */}
-               <div className="mb-8 flex items-center gap-2 lg:hidden">
+               <Link to="/" className="mb-8 flex w-max items-center gap-2 lg:hidden">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500">
                      <Code2
                         className="h-5 w-5 text-white"
@@ -201,7 +201,7 @@ export default function LoginPage() {
                      />
                   </div>
                   <span className="text-xl font-bold">MockSprint</span>
-               </div>
+               </Link>
 
                {/* Heading */}
                <div className="mb-8 space-y-1">

@@ -5,6 +5,13 @@ import { baseApi } from '@/api/base.api';
  */
 export const interviewApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    getAdminInterviews: builder.query<any, { page: number; limit: number }>({
+      query: (params) => ({
+        url: '/admin/interviews',
+        params,
+      }),
+      providesTags: ['Interview'],
+    }),
     getInterviews: builder.query<any[], void>({
       query: () => '/interviews',
       providesTags: ['Interview'],
@@ -55,6 +62,7 @@ export const interviewApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useGetAdminInterviewsQuery,
   useGetInterviewsQuery,
   useGetHistoryQuery,
   useGetSubmissionsQuery,

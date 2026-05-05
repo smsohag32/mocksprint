@@ -34,6 +34,17 @@ import LandingPage from "@/pages/LandingPage";
 
 import ManageUsersPage from "@/pages/administrator/user_management/ManageUsersPage";
 
+// Static Pages
+const TermsPage = lazyWithRetry(() => import("@/pages/TermsPage"));
+const PrivacyPage = lazyWithRetry(() => import("@/pages/PrivacyPage"));
+const AboutUsPage = lazyWithRetry(() => import("@/pages/AboutUsPage"));
+const CookiePolicyPage = lazyWithRetry(() => import("@/pages/CookiePolicyPage"));
+
+// Blog Pages
+const BlogPage = lazyWithRetry(() => import("@/pages/BlogPage"));
+const BlogPostPage = lazyWithRetry(() => import("@/pages/BlogPostPage"));
+const ManageBlogsPage = lazyWithRetry(() => import("@/pages/administrator/blog_management/ManageBlogsPage"));
+
 // Lazy loaded pages
 const LoginPage = lazyWithRetry(() => import("@/pages/LoginPage"));
 const RegisterPage = lazyWithRetry(() => import("@/pages/RegisterPage"));
@@ -69,6 +80,30 @@ export const router = createBrowserRouter([
                {
                   index: true,
                   element: <LandingPage />,
+               },
+               {
+                  path: "terms",
+                  element: <TermsPage />,
+               },
+               {
+                  path: "privacy",
+                  element: <PrivacyPage />,
+               },
+               {
+                  path: "about",
+                  element: <AboutUsPage />,
+               },
+               {
+                  path: "cookie-policy",
+                  element: <CookiePolicyPage />,
+               },
+               {
+                  path: "blogs",
+                  element: <BlogPage />,
+               },
+               {
+                  path: "blogs/:slug",
+                  element: <BlogPostPage />,
                },
             ],
          },
@@ -189,6 +224,14 @@ export const router = createBrowserRouter([
                         element: (
                            <ProtectedRoute requireAdmin>
                               <ManageCategoriesPage />
+                           </ProtectedRoute>
+                        ),
+                     },
+                     {
+                        path: "blogs",
+                        element: (
+                           <ProtectedRoute requireAdmin>
+                              <ManageBlogsPage />
                            </ProtectedRoute>
                         ),
                      },
