@@ -72,28 +72,28 @@ export default function Footer() {
                   <ul className="space-y-4 text-muted-foreground">
                      <li>
                         <Link
-                           to="#"
+                           to="/about"
                            className="hover:text-primary transition-colors">
                            About Us
                         </Link>
                      </li>
                      <li>
                         <Link
-                           to="#"
+                           to="/blogs"
                            className="hover:text-primary transition-colors">
                            Blog
                         </Link>
                      </li>
                      <li>
                         <Link
-                           to="#"
+                           to="/terms"
                            className="hover:text-primary transition-colors">
                            Terms of Service
                         </Link>
                      </li>
                      <li>
                         <Link
-                           to="#"
+                           to="/privacy"
                            className="hover:text-primary transition-colors">
                            Privacy Policy
                         </Link>
@@ -105,17 +105,17 @@ export default function Footer() {
                <div>© {new Date().getFullYear()} MockSprint. All rights reserved.</div>
                <div className="flex items-center gap-8">
                   <Link
-                     to="#"
+                     to="/privacy"
                      className="hover:text-primary transition-colors">
                      Privacy
                   </Link>
                   <Link
-                     to="#"
+                     to="/terms"
                      className="hover:text-primary transition-colors">
                      Terms
                   </Link>
                   <Link
-                     to="#"
+                     to="/cookie-policy"
                      className="hover:text-primary transition-colors">
                      Cookie Policy
                   </Link>
