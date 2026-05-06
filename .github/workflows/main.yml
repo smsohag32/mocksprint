@@ -1,0 +1,35 @@
+name: CI/CD
+
+on:
+   push:
+      branches:
+         - main
+
+jobs:
+   build_and_deploy:
+      runs-on: ubuntu-latest
+
+      steps:
+         - name: Checkout repository
+           uses: actions/checkout@v3
+
+         - name: Install Node.js 22
+           uses: actions/setup-node@v2
+           with:
+              node-version: "22"
+
+         - name: Install dependencies
+           run: npm install --force
+
+         - name: Build the project
+           run: npm run build
+
+         - name: 📂 Sync files
+           uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+           with:
+              server: ${{ secrets.FTP_SERVER }}
+              username: ${{ secrets.FTP_USERNAME }}
+              password: ${{ secrets.FTP_PASSWORD }}
+              protocol: ${{ secrets.FTP_PROTOCOL }}
+              passive: true
+              local-dir: ./dist/
