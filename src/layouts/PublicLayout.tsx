@@ -16,12 +16,38 @@ export default function PublicLayout() {
          {/* Navigation */}
          <nav className="sticky top-0 z-50 glass">
             <div className="container mx-auto flex h-20 items-center justify-between px-6">
-               <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center gap-2">
-                  <Logo className="w-40 sm:w-48" />
-               </motion.div>
+               <div className="flex items-center gap-8">
+                  <motion.div
+                     initial={{ opacity: 0, x: -20 }}
+                     animate={{ opacity: 1, x: 0 }}
+                     className="flex items-center gap-2">
+                     <Logo className="w-40 sm:w-48" />
+                  </motion.div>
+
+                  {/* Navigation Links */}
+                  <div className="hidden lg:flex items-center gap-6">
+                     <Link
+                        to="/about"
+                        className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors">
+                        About Us
+                     </Link>
+                     <Link
+                        to="/blogs"
+                        className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors">
+                        Blog
+                     </Link>
+                     <Link
+                        to="/terms"
+                        className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors">
+                        Terms
+                     </Link>
+                     <Link
+                        to="/privacy"
+                        className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors">
+                        Privacy
+                     </Link>
+                  </div>
+               </div>
                <div className="flex items-center gap-4">
                   <Button
                      variant="ghost"

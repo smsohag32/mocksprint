@@ -1,42 +1,56 @@
-# MockSprint - Real-Time Interview Practice
+# MockSprint — Frontend
 
-## 🔐 Authentication Service
+MockSprint is a high-performance interview preparation platform designed to help developers master technical interviews under real-world pressure. The frontend is built with **React**, **TypeScript**, and **Vite**, offering a sleek, responsive, and developer-focused experience.
 
-A robust, enterprise-grade authentication system built with **Redux Toolkit**, **RTK Query**, and **Cookie-based persistence**. This service handles secure login, session persistence, and automatic token re-authentication.
+## 🚀 Key Features
 
-### 🚀 Key Features
+### 💻 Interview Simulator
+- **Monaco Editor Integration:** Industry-standard code editor with syntax highlighting and autocomplete.
+- **Timed Challenges:** Practice under actual interview constraints to build psychological resilience.
+- **Instant Validation:** Automated test runners provide immediate feedback on solutions.
 
-- **Double-Token Strategy**: Uses `access_token` and `refresh_token` for optimal security.
-- **Persistent State**: Authentication state is persisted via cookies, ensuring users stay logged in across page refreshes.
-- **Automatic Re-auth**: Global interceptor in `baseApi` automatically handles `401 Unauthorized` errors by attempting a token refresh and retrying failed requests.
-- **Centralized Slices**: All Redux state is organized in `src/store/slices/`.
-- **Domain-Driven Hooks**: Auth hooks are grouped in `src/hooks/auth/`.
+### 📊 Performance Tracking
+- **User Dashboard:** Track your progress, solved questions, and performance metrics over time.
+- **Global Leaderboard:** Compete with developers worldwide and showcase your skills.
+- **Interview History:** Review past attempts to identify areas for improvement.
 
-### 📂 Enterprise Architecture
+### 📚 Content & Community
+- **Questions Explorer:** Browse a curated list of technical challenges across various categories.
+- **Interactive Blog:** Read insights, tips, and updates from the MockSprint team.
+- **Multi-Theme Support:** Seamlessly switch between elegant Dark and Light modes.
 
-| Path | Description |
-| :--- | :--- |
-| `src/api/base.api.ts` | The foundational RTK Query provider (`baseApi`). |
-| `src/api/endpoints/` | Domain-specific API definitions (auth, user, etc.). |
-| `src/store/slices/` | Centralized Redux slices (auth, theme). |
-| `src/services/auth/` | Manual API actions (thunks) and logic. |
-| `src/hooks/auth/` | High-level authentication hooks (`useAuth`, etc.). |
-| `src/helpers/cookie.ts` | Utilities for managing browser cookies. |
+### 🛡️ Administrative Suite
+- **User Management:** Complete control over user accounts and details.
+- **Content Management:** Tools to add, edit, and manage interview questions and blog posts.
+- **Analytics Overview:** High-level overview of platform usage and user growth.
 
-### 🛠️ Usage Example
+## 🛠️ Technology Stack
+- **Framework:** React 18+ (Vite)
+- **Language:** TypeScript
+- **State Management:** Redux Toolkit
+- **Styling:** Tailwind CSS & Framer Motion (for smooth animations)
+- **UI Components:** Shadcn UI (Radix UI primitives)
+- **Icons:** Lucide React
 
-#### Accessing Auth State
-```typescript
-import { useAuth } from '@/hooks/auth/useAuth';
+## 📦 Getting Started
 
-const Profile = () => {
-  const { user, isAuthenticated, logout } = useAuth();
-  // ...
-};
-```
+1. **Clone the repository**
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+3. **Configure Environment:**
+   Create a `.env` file based on `.env.example` and set your `VITE_API_BASE_URL`.
+4. **Run Development Server:**
+   ```bash
+   npm run dev
+   ```
 
-### ⚙️ Configuration
-The service relies on the following environment variables:
-- `VITE_BASE_API_URL`: The base URL for all API calls.
+## 🎨 Design System
+MockSprint follows a modern, "glassmorphism" aesthetic with a focus on:
+- **High Readability:** Using Inter/Outfit typography.
+- **Dynamic Interactions:** Micro-animations for feedback and engagement.
+- **Premium Feel:** Vibrant gradients and sleek dark modes.
 
 ---
+Built by ❤️ Sohag
