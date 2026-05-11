@@ -52,6 +52,17 @@ export const authApi = baseApi.injectEndpoints({
             url: "/auth/logout",
             method: "POST",
          }),
+         async onQueryStarted(_args, { dispatch, queryFulfilled }) {
+            try {
+               await queryFulfilled;
+               const { logoutUser } = await import("@/store/slices/auth.slice");
+               dispatch(logoutUser());
+            } catch (err) {
+               // Still clear state even if server logout fails
+               const { logoutUser } = await import("@/store/slices/auth.slice");
+               dispatch(logoutUser());
+            }
+         },
       }),
 
       // ── Refresh Access Token ───────────────────────

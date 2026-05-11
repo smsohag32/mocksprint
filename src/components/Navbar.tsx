@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { getImageUrl } from "@/lib/image-utils";
+import { toast } from "sonner";
 
 export function Navbar() {
    const { mode, toggle } = useTheme();
@@ -21,8 +22,15 @@ export function Navbar() {
    const navigate = useNavigate();
 
    const handleLogout = async () => {
-      await logoutFn();
-      navigate("/login");
+      try {
+         await logoutFn().unwrap();
+         toast.success("Logged out successfully. See you soon! 👋");
+      } catch (err) {
+         // Even if server call fails, we proceed with local cleanup via onQueryStarted
+         toast.success("Logged out. See you soon! 👋");
+      } finally {
+         navigate("/login");
+      }
    };
 
    return (
