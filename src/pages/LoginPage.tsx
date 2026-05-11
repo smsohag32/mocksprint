@@ -14,7 +14,7 @@ import {
    Lock,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useLoginMutation } from "@/api/endpoints/auth.api";
+import { useLoginMutation, useResendVerificationMutation } from "@/api/endpoints/auth.api";
 import { useAppDispatch } from "@/store/hooks";
 import { setCredentials } from "@/store/slices/auth.slice";
 import Logo from "@/assets/logo/Logo";
@@ -39,14 +39,28 @@ const highlights = [
 export default function LoginPage() {
    const [showPassword, setShowPassword] = useState(false);
    const [login, { isLoading }] = useLoginMutation();
+   const [resendVerification, { isLoading: isResending }] = useResendVerificationMutation();
    const navigate = useNavigate();
    const dispatch = useAppDispatch();
 
    const {
       register,
       handleSubmit,
+      getValues,
       formState: { errors },
    } = useForm<LoginFormValues>({ mode: "onTouched" });
+
+   const handleResend = async () => {
+      const email = getValues("email");
+      if (!email) return;
+
+      try {
+         const result = await resendVerification({ email }).unwrap();
+         toast.success(result.message || "Verification link sent! 🚀");
+      } catch (err: any) {
+         toast.error(err?.data?.message || "Failed to resend link. Please try again.");
+      }
+   };
 
    const onSubmit = async (data: LoginFormValues) => {
       try {
@@ -61,7 +75,19 @@ export default function LoginPage() {
          toast.success("Welcome back! 🚀");
          navigate("/dashboard");
       } catch (err: any) {
-         toast.error(err?.data?.message || err?.message || "Login failed. Please try again.");
+         const errorMessage = err?.data?.message || err?.message || "Login failed.";
+         
+         if (errorMessage.toLowerCase().includes("not verified")) {
+            toast.error(errorMessage, {
+               action: {
+                  label: "Resend Link",
+                  onClick: handleResend,
+               },
+               duration: 6000,
+            });
+         } else {
+            toast.error(errorMessage);
+         }
       }
    };
 

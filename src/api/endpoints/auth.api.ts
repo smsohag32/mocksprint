@@ -112,6 +112,15 @@ export const authApi = baseApi.injectEndpoints({
             body,
          }),
       }),
+
+      // ── Resend Verification Link ──────────────────
+      resendVerification: builder.mutation<any, { email: string }>({
+         query: (body) => ({
+            url: "/auth/resend-verification",
+            method: "POST",
+            body,
+         }),
+      }),
    }),
    overrideExisting: false,
 });
@@ -127,4 +136,5 @@ export const {
    useRequestPasswordResetMutation,
    useVerifyOtpMutation,
    useSetNewPasswordMutation,
+   useResendVerificationMutation,
 } = authApi;
