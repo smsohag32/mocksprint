@@ -1,5 +1,7 @@
 # MockSprint - Real-Time Interview Practice
 
+🚀 MockSprint MockSprint is a comprehensive platform for technical interview preparation. It allows users to practice coding challenges, participate in mock interviews, and track their progress through a professional, user-fidelity user interface.
+
 ## 🔐 Authentication Service
 
 A robust, enterprise-grade authentication system built with **Redux Toolkit**, **RTK Query**, and **Cookie-based persistence**. This service handles secure login, session persistence, and automatic token re-authentication.
