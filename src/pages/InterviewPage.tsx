@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,10 @@ import {
    Sparkles,
    Lightbulb,
    MessageSquare,
+   Copy,
+   Check,
+   Code2,
+   AlignLeft,
 } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { useGetQuestionsQuery } from "@/api/endpoints/question.api";
@@ -76,6 +80,10 @@ export default function InterviewPage() {
    } | null>(null);
    const [getHint, { isLoading: isHintLoading }] = useGetHintMutation();
    const [hints, setHints] = useState<string[]>([]);
+   const editorRef = useRef<any>(null);
+   const [hasCopiedFeedback, setHasCopiedFeedback] = useState(false);
+   const [hasCopiedCode, setHasCopiedCode] = useState(false);
+   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
 
    // Auto-load question from URL query ?q=...
    useEffect(() => {
@@ -143,11 +151,18 @@ export default function InterviewPage() {
       if (!interviewId || !selectedQuestion) return;
       setIsRunning(false);
       setIsEvaluating(true);
+
+      const timeoutPromise = new Promise((_, reject) => 
+         setTimeout(() => reject(new Error("Evaluation request timed out after 30 seconds. Please try again.")), 30000)
+      );
+
       try {
-         const result = await submitInterview({
+         const submitPromise = submitInterview({
             id: interviewId,
             code,
          }).unwrap();
+
+         const result = (await Promise.race([submitPromise, timeoutPromise])) as any;
          setSubmissionResult({ 
             score: result.score, 
             feedback: result.feedback, 
@@ -155,8 +170,8 @@ export default function InterviewPage() {
          });
          toast.success("Solution evaluated successfully!");
          setInterviewId(null);
-      } catch {
-         toast.error("Evaluation failed");
+      } catch (err: any) {
+         toast.error(err?.message || err?.data?.message || "Evaluation failed. Please try again.");
          setIsRunning(true);
       } finally {
          setIsEvaluating(false);
@@ -182,8 +197,57 @@ export default function InterviewPage() {
       }
    };
 
+   const handleFormatCode = () => {
+      if (editorRef.current) {
+         editorRef.current.getAction("editor.action.formatDocument")?.run();
+         toast.success("Code formatted");
+      } else {
+         toast.info("Editor is not ready yet");
+      }
+   };
+
+   const handleCopyCode = async () => {
+      try {
+         await navigator.clipboard.writeText(code);
+         setHasCopiedCode(true);
+         toast.success("Code copied to clipboard!");
+         setTimeout(() => setHasCopiedCode(false), 2000);
+      } catch {
+         toast.error("Failed to copy code to clipboard");
+      }
+   };
+
+   const handleConfirmReset = () => {
+      setCode(selectedQuestion?.starter_code || "// Start coding here\n");
+      setIsResetDialogOpen(false);
+      toast.info("Code reset to starter template");
+   };
+
+   const handleCopyFeedback = async () => {
+      if (!submissionResult) return;
+      const formattedFeedback = [
+         `# MockSprint Evaluation Report - ${selectedQuestion?.title || "Challenge"}`,
+         `Score: ${submissionResult.score}%`,
+         submissionResult.interviewerMessage ? `Interviewer Note: "${submissionResult.interviewerMessage}"` : "",
+         "",
+         `### Detailed Feedback:`,
+         submissionResult.feedback || "No feedback text available.",
+      ]
+         .filter(Boolean)
+         .join("\n");
+
+      try {
+         await navigator.clipboard.writeText(formattedFeedback);
+         setHasCopiedFeedback(true);
+         toast.success("Evaluation feedback copied to clipboard!");
+         setTimeout(() => setHasCopiedFeedback(false), 2000);
+      } catch {
+         toast.error("Failed to copy feedback to clipboard");
+      }
+   };
+
    const handleReset = () => {
-      setCode(selectedQuestion?.starter_code || "");
+      setIsResetDialogOpen(true);
    };
 
    const filteredQuestions =
@@ -443,20 +507,58 @@ export default function InterviewPage() {
                )}
             </div>
 
-            <Card className="lg:col-span-3 border-border/50 overflow-hidden shadow-lg relative group">
-               <div className="absolute top-0 right-0 p-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Badge
-                     variant="outline"
-                     className="bg-background/80 backdrop-blur-md text-[10px] uppercase font-bold text-muted-foreground">
-                     Monaco Engine v0.34
-                  </Badge>
+            <Card className="lg:col-span-3 border-border/50 overflow-hidden shadow-lg flex flex-col bg-card/60 backdrop-blur-sm">
+               {/* Editor Toolbar */}
+               <div className="flex items-center justify-between px-4 py-2 border-b border-border/50 bg-muted/20">
+                  <div className="flex items-center gap-2">
+                     <Code2 className="h-4 w-4 text-primary" />
+                     <span className="text-xs font-bold tracking-tight">JavaScript Workspace</span>
+                     <Badge
+                        variant={isRunning ? "default" : "secondary"}
+                        className="text-[10px] uppercase font-bold px-1.5 py-0">
+                        {isRunning ? "Live Session" : "Standby"}
+                     </Badge>
+                  </div>
+                  <div className="flex items-center gap-1">
+                     <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 text-xs font-semibold gap-1 text-muted-foreground hover:text-foreground"
+                        onClick={handleCopyCode}
+                        title="Copy code to clipboard">
+                        {hasCopiedCode ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                        <span className="hidden sm:inline">{hasCopiedCode ? "Copied" : "Copy Code"}</span>
+                     </Button>
+                     <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 text-xs font-semibold gap-1 text-muted-foreground hover:text-foreground"
+                        onClick={handleFormatCode}
+                        title="Format code (Prettify)">
+                        <AlignLeft className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Format</span>
+                     </Button>
+                     <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 text-xs font-semibold gap-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        onClick={handleReset}
+                        title="Reset code to starter template">
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Reset</span>
+                     </Button>
+                  </div>
                </div>
-               <CardContent className="p-0">
+
+               <CardContent className="p-0 flex-1">
                   <Editor
-                     height="calc(100vh - 200px)"
+                     height="calc(100vh - 245px)"
                      defaultLanguage="javascript"
                      theme={themeMode === "dark" ? "vs-dark" : "light"}
                      value={code}
+                     onMount={(editor) => {
+                        editorRef.current = editor;
+                     }}
                      onChange={(v) => setCode(v || "")}
                      options={{
                         minimap: { enabled: false },
@@ -464,15 +566,54 @@ export default function InterviewPage() {
                         lineNumbers: "on",
                         scrollBeyondLastLine: false,
                         automaticLayout: true,
-                        padding: { top: 20 },
+                        padding: { top: 16, bottom: 16 },
                         cursorBlinking: "smooth",
                         fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
                         renderLineHighlight: "all",
                      }}
                   />
                </CardContent>
+
+               {/* Editor Status Bar */}
+               <div className="flex items-center justify-between px-4 py-1.5 border-t border-border/40 bg-muted/10 text-[11px] text-muted-foreground font-mono">
+                  <div className="flex items-center gap-3">
+                     <span>Lines: {code.split("\n").length}</span>
+                     <span>Chars: {code.length}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px]">
+                     <span>JavaScript</span>
+                     <span>•</span>
+                     <span>UTF-8</span>
+                     <span>•</span>
+                     <span>Monaco Editor</span>
+                  </div>
+               </div>
             </Card>
          </div>
+
+         {/* Reset Confirmation Dialog */}
+         <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+            <DialogContent className="sm:max-w-md border-border/60">
+               <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                     <RotateCcw className="h-5 w-5 text-amber-500" />
+                     Reset Code to Template?
+                  </DialogTitle>
+                  <DialogDescription className="pt-2 text-sm leading-relaxed text-muted-foreground">
+                     This will revert your current editor content back to the default boilerplate for
+                     &quot;{selectedQuestion?.title || "this problem"}&quot;. Any custom code written will be overwritten.
+                  </DialogDescription>
+               </DialogHeader>
+               <DialogFooter className="gap-2 sm:gap-0 pt-4">
+                  <Button variant="outline" onClick={() => setIsResetDialogOpen(false)}>
+                     Keep My Code
+                  </Button>
+                  <Button variant="destructive" onClick={handleConfirmReset}>
+                     Yes, Reset Code
+                  </Button>
+               </DialogFooter>
+            </DialogContent>
+         </Dialog>
 
          {/* Professional Completion Modal */}
          <Dialog open={!!submissionResult} onOpenChange={(open) => !open && setSubmissionResult(null)}>
@@ -519,10 +660,20 @@ export default function InterviewPage() {
 
                   {submissionResult?.feedback && (
                      <div className="text-left space-y-3 bg-primary/5 p-4 rounded-xl border border-primary/10">
-                        <div className="flex items-center gap-2 text-primary font-bold text-sm">
-                           <MessageSquare className="h-4 w-4" /> Interviewer Feedback
+                        <div className="flex items-center justify-between">
+                           <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                              <MessageSquare className="h-4 w-4" /> Interviewer Feedback
+                           </div>
+                           <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleCopyFeedback}
+                              className="h-7 px-2 text-xs font-semibold gap-1 text-primary hover:bg-primary/10">
+                              {hasCopiedFeedback ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                              {hasCopiedFeedback ? "Copied" : "Copy Feedback"}
+                           </Button>
                         </div>
-                        <div className="text-xs text-muted-foreground prose prose-invert max-h-[150px] overflow-y-auto pr-2 scrollbar-thin">
+                        <div className="text-xs text-muted-foreground prose prose-invert max-h-[160px] overflow-y-auto pr-2 scrollbar-thin whitespace-pre-wrap leading-relaxed">
                            {submissionResult.feedback}
                         </div>
                      </div>
@@ -530,7 +681,7 @@ export default function InterviewPage() {
 
                   {submissionResult?.interviewerMessage && (
                      <p className="text-xs italic text-muted-foreground">
-                        "{submissionResult.interviewerMessage}"
+                        &quot;{submissionResult.interviewerMessage}&quot;
                      </p>
                   )}
 
